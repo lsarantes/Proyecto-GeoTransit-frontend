@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
+import { useAuth } from "@/context/AuthContext";
 
 //Para Mobile
 function useIsMobile() {
@@ -31,6 +32,11 @@ function useIsMobile() {
 const Navbar = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
+
+  
+  const { isLoggedIn, logout } = useAuth()
+
+  if (!isLoggedIn) return null
   return (
     <div className="border-b-2 bg-white dark:bg-gray-800">
       <div className="flex items-center justify-between sm:max mx-10 p-4 ">
@@ -215,7 +221,7 @@ const Navbar = () => {
                     <ul className="grid w-[200px] gap-4">
                       <li>
                         <NavigationMenuLink asChild>
-                          <Link href="#" className="hoverTextAcentuar ">
+                          <Link href="/login" onClick={() => logout()} className="hoverTextAcentuar ">
                             Cerrar sesion
                           </Link>
                         </NavigationMenuLink>

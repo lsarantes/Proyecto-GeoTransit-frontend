@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import dashboard from "@/components/Navbar"
+import { AuthProvider } from "@/context/AuthContext";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
-const mostrarNavbar = true;
 
 export const metadata: Metadata = {
   title: "GeoTransit",
@@ -17,11 +16,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <html lang="en">
       <body className={`${montserrat.className} `}>
-        {mostrarNavbar && <Navbar />}
-        {children}
+        
+        <AuthProvider>
+          <Navbar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
