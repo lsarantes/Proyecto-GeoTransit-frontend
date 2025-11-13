@@ -132,3 +132,17 @@
 
  color: var(--colorAcentuar);
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px rgb(30, 41, 59) inset !important; /* relleno del fondo */
+  box-shadow: 0 0 0 1000px rgb(30, 41, 59) inset !important;
+  -webkit-text-fill-color: white !important; /* texto */
+  caret-color: white; /* cursor */
+}
+
+input:-webkit-autofill::first-line {
+  font-size: 16px;
+}
