@@ -73,7 +73,7 @@ const Navbar = () => {
                   <ul className="grid w-[300px] gap-4">
                     <li>
                       <NavigationMenuLink asChild>
-                        <Link href="#">
+                        <Link href="/Cooperativa/AgregarCooperativas">
                           <div className="font-medium text-black ">
                             Cooperativa
                           </div>
