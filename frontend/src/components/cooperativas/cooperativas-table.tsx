@@ -1,190 +1,150 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Eye, MoreVertical } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+
+import { Badge } from "@/components/ui/badge";
+
+import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 interface Cooperativa {
-  id: number
-  nombre: string
-  encargado: string
-  rutas: number
-  telefono: string
-  direccion: string
+  id: number;
+  nombre: string;
+  encargado: string;
+  rutas: number;
+  telefono: string;
+  direccion: string;
 }
 
 interface CooperativasTableProps {
-  cooperativas: Cooperativa[]
-  onEdit?: (coop: Cooperativa) => void
-  onDelete?: (id: number) => void
-  onView?: (coop: Cooperativa) => void
+  cooperativas: Cooperativa[];
+  onEdit?: (coop: Cooperativa) => void;
+  onDelete?: (id: number) => void;
+  onView?: (coop: Cooperativa) => void;
 }
 
-export function CooperativasTable({ cooperativas, onEdit, onDelete, onView }: CooperativasTableProps) {
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null)
-
+export function CooperativasTable({
+  cooperativas,
+  onEdit,
+  onDelete,
+  onView,
+}: CooperativasTableProps) {
   return (
-    <div
-      style={{ backgroundColor: '#FFFFFF' }}
-      className="rounded-lg overflow-visible shadow-sm"
-    >
-      <table className="w-full">
-        <thead>
-          <tr style={{ backgroundColor: '#2275C3' }}>
-            <th
-              style={{ color: '#FFFFFF' }}
-              className="px-6 py-4 text-left font-semibold"
-            >
+    <div className="rounded-md border bg-card text-card-foreground shadow-sm overflow-hidden">
+      <Table>
+        <TableCaption className="mb-3 text-xs">
+          {cooperativas.length} cooperativa(s) registrada(s)
+        </TableCaption>
+
+        <TableHeader>
+          <TableRow className="rounded-md border-b-0 bg-sky-900 hover:bg-sky-950">
+            <TableHead className="text-primary-foreground text-start ">
               ID
-            </th>
-            <th
-              style={{ color: '#FFFFFF' }}
-              className="px-6 py-4 text-left font-semibold"
-            >
-              Nombre
-            </th>
-            <th
-              style={{ color: '#FFFFFF' }}
-              className="px-6 py-4 text-left font-semibold"
-            >
-              Encargado
-            </th>
-            <th
-              style={{ color: '#FFFFFF' }}
-              className="px-6 py-4 text-left font-semibold"
-            >
-              Rutas
-            </th>
-            <th
-              style={{ color: '#FFFFFF' }}
-              className="px-6 py-4 text-left font-semibold"
-            >
-              Teléfono
-            </th>
-            <th
-              style={{ color: '#FFFFFF' }}
-              className="px-6 py-4 text-left font-semibold"
-            >
-              Dirección
-            </th>
-            <th
-              style={{ color: '#FFFFFF' }}
-              className="px-6 py-4 text-center font-semibold"
-            >
+            </TableHead>
+            <TableHead className="text-primary-foreground">Nombre</TableHead>
+            <TableHead className="text-primary-foreground">Encargado</TableHead>
+            <TableHead className="text-primary-foreground">Rutas</TableHead>
+            <TableHead className="text-primary-foreground">Teléfono</TableHead>
+            <TableHead className="text-primary-foreground">Dirección</TableHead>
+            <TableHead className="text-end text-primary-foreground ">
               Acciones
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {cooperativas.map((coop, index) => (
-            <tr
-              key={coop.id}
-              style={{
-                backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#F2F7FD',
-                borderBottom: '1px solid #C1DAF6',
-              }}
-            >
-              <td
-                style={{ color: '#3F4756' }}
-                className="px-6 py-4 font-medium"
-              >
-                {coop.id}
-              </td>
-              <td
-                style={{ color: '#3F4756' }}
-                className="px-6 py-4 font-medium"
-              >
-                {coop.nombre}
-              </td>
-              <td style={{ color: '#3F4756' }} className="px-6 py-4">
-                {coop.encargado}
-              </td>
-              <td style={{ color: '#3F4756' }} className="px-6 py-4">
-                <span
-                  style={{
-                    backgroundColor: '#C1DAF6',
-                    color: '#2275C3',
-                  }}
-                  className="px-3 py-1 rounded-full text-sm font-semibold"
-                >
-                  {coop.rutas}
-                </span>
-              </td>
-              <td style={{ color: '#3F4756' }} className="px-6 py-4">
-                {coop.telefono}
-              </td>
-              <td style={{ color: '#3F4756' }} className="px-6 py-4">
-                {coop.direccion}
-              </td>
-              <td className="px-6 py-4">
-                <div className="flex items-center justify-center gap-2">
-                  {/* View Details Button */}
-                  <button
-                    onClick={() => onView?.(coop)}
-                    style={{ color: '#2275C3' }}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Ver detalles"
-                  >
-                    <Eye size={20} />
-                  </button>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
 
-                  {/* Options Menu Button */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setOpenMenuId(openMenuId === coop.id ? null : coop.id)}
-                      style={{ color: '#2275C3' }}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      title="Más opciones"
+        <TableBody>
+          {cooperativas.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={7}
+                className="py-12 text-center text-muted-foreground"
+              >
+                No hay cooperativas registradas
+              </TableCell>
+            </TableRow>
+          ) : (
+            cooperativas.map((coop) => (
+              <TableRow
+                key={coop.id}
+                className="hover:bg-gray-100 hoverTextAcentuar"
+              >
+                <TableCell className="font-medium">{coop.id}</TableCell>
+                <TableCell>{coop.nombre}</TableCell>
+                <TableCell>{coop.encargado}</TableCell>
+                <TableCell>
+                  <Badge variant="secondary" className="bg-blue-200 text-black">
+                    {coop.rutas}
+                  </Badge>
+                </TableCell>
+                <TableCell>{coop.telefono}</TableCell>
+                <TableCell>{coop.direccion}</TableCell>
+
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Ver detalles"
+                      onClick={() => onView?.(coop)}
+                      className="cursor-pointer"
                     >
-                      <MoreVertical size={20} />
-                    </button>
+                      <Eye className="h-4 w-4" />
+                    </Button>
 
-                    {/* Dropdown Menu - Positioned with higher z-index and top positioning */}
-                    {openMenuId === coop.id && (
-                      <div
-                        style={{
-                          backgroundColor: '#FFFFFF',
-                          borderColor: '#C1DAF6',
-                        }}
-                        className="absolute right-0 top-full mt-1 w-40 border rounded-lg shadow-xl z-50"
-                      >
-                        <button
-                          onClick={() => {
-                            onEdit?.(coop)
-                            setOpenMenuId(null)
-                          }}
-                          style={{ color: '#3F4756' }}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-50 first:rounded-t-lg transition-colors font-medium"
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Más opciones"
+                          className="cursor-pointer"
                         >
-                          Editar
-                        </button>
-                        <div style={{ borderColor: '#C1DAF6' }} className="border-t"></div>
-                        <button
-                          onClick={() => {
-                            onDelete?.(coop.id)
-                            setOpenMenuId(null)
-                          }}
-                          style={{ color: '#605AEA' }}
-                          className="w-full text-left px-4 py-3 hover:bg-gray-50 last:rounded-b-lg transition-colors font-medium"
+                          <span className="sr-only ">Abrir menú</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => onEdit?.(coop)}
+                          className="cursor-pointer"
                         >
-                          Eliminar
-                        </button>
-                      </div>
-                    )}
+                          <Pencil className="mr-2 h-4 w-4 stroke-neutral-800" />
+                          <span>Editar</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive cursor-pointer"
+                          onClick={() => onDelete?.(coop.id)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4 stroke-red-500" />
+                          <span>Eliminar</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {cooperativas.length === 0 && (
-        <div className="text-center py-12">
-          <p style={{ color: '#605AEA' }} className="text-lg font-medium">
-            No hay cooperativas registradas
-          </p>
-        </div>
-      )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
-  )
+  );
 }

@@ -14,6 +14,10 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/AuthContext";
+import {
+  ArrowLeftOnRectangleIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/solid";
 
 //Para Mobile
 function useIsMobile() {
@@ -33,16 +37,16 @@ const Navbar = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
 
-  
-  const { isLoggedIn, logout } = useAuth()
+  const { isLoggedIn, logout } = useAuth();
 
-  if (!isLoggedIn) return null
+  if (!isLoggedIn) return null;
   return (
     <div className="border-b-2 bg-white dark:bg-gray-800">
       <div className="flex items-center justify-between sm:max mx-10 p-4 ">
-        <div className="flex cursor-pointer">
+        <div className="flex cursor-pointer ">
           <h1
-            className="text-2xl hoverTextAcentuar" 
+            className="text-2xl logoGlow"
+            
             onClick={() => router.push("/dashboard")}
           >
             Geo
@@ -73,13 +77,11 @@ const Navbar = () => {
                   <ul className="grid w-[300px] gap-4">
                     <li>
                       <NavigationMenuLink asChild>
-                        <Link href="/Cooperativa/AgregarCooperativas">
-                          <div className="font-medium text-black ">
-                            Cooperativa
-                          </div>
-                          <div className="text-muted-foreground">
+                        <Link href="Cooperativa/agregar_cooperativas">
+                          <span className="font-medium">Cooperativa</span>
+                          <span className="text-muted-foreground">
                             Crea, edita y elimina Cooperativas
-                          </div>
+                          </span>
                         </Link>
                       </NavigationMenuLink>
 
@@ -205,30 +207,43 @@ const Navbar = () => {
             />
             <AvatarFallback>PG</AvatarFallback>
           </Avatar>
-          <div>           
+          <div>
             <NavigationMenu className="" viewport={isMobile}>
               <NavigationMenuList>
                 <NavigationMenuItem className="hidden md:block">
                   <NavigationMenuTrigger className="cursor-pointer">
                     <p className="flex flex-col">
-                      <span className="font-bold">Paolo Guerrero Herrero</span>
-                      <span className="text-muted-foreground">
+                      <span className="text-sm font-semibold text-foreground">
+                        Paolo Guerrero
+                      </span>
+                      <span className="text-xs text-muted-foreground">
                         Encargado MTI
                       </span>
                     </p>
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid w-[200px] gap-4">
+                    <ul className="grid w-100 gap-4">
                       <li>
                         <NavigationMenuLink asChild>
-                          <Link href="/login" onClick={() => logout()} className="hoverTextAcentuar ">
-                            Cerrar sesion
+                          <Link
+                            href="#"
+                            className="flex-row items-center gap-2"
+                          >
+                            <Cog6ToothIcon className="fill-neutral-800"/>
+                            Configuración
                           </Link>
                         </NavigationMenuLink>
-
-                        <NavigationMenuLink asChild>
-                          <Link href="#" className="hoverTextAcentuar">
-                            Configuración
+                        <NavigationMenuLink
+                          asChild
+                          className="text-red-500 hover:bg-red-50 hover:text-red-500"
+                        >
+                          <Link
+                            href="/login"
+                            onClick={() => logout()}
+                            className="flex-row items-center gap-2"
+                          >
+                            <ArrowLeftOnRectangleIcon className="h-5 w-5 stroke-red-500" />
+                            <span>Cerrar sesion</span>
                           </Link>
                         </NavigationMenuLink>
                       </li>
@@ -240,7 +255,7 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-    <Separator/>
+      <Separator />
     </div>
   );
 };

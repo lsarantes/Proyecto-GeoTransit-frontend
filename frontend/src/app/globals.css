@@ -3,8 +3,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -45,11 +43,10 @@
 
 :root {
   /*COLORES*/
-  --colorPrimary: #2275C3;
-  --colorSecondary: #C1DAF6;
-  --colorAcentuar: #605AEA;
-  --textColor: #3F4756;
-
+  --colorPrimary: #2275c3;
+  --colorSecondary: #c1daf6;
+  --colorAcentuar: #605aea;
+  --textColor: #3f4756;
 
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -128,9 +125,8 @@
   }
 }
 
-.hoverTextAcentuar:hover{
-
- color: var(--colorAcentuar);
+.hoverTextAcentuar:hover {
+  color: var(--colorAcentuar);
 }
 
 input:-webkit-autofill,
@@ -145,4 +141,11 @@ input:-webkit-autofill:active {
 
 input:-webkit-autofill::first-line {
   font-size: 16px;
+}
+.logoGlow:hover {
+  color: var(--colorAcentuar);
+}
+
+.btn-colorPrimary {
+  background-color: var(--colorPrimary);
 }
