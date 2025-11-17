@@ -54,8 +54,6 @@ const Navbar = () => {
   };
 
   const limpiarDropdown = () => {
-    setOpenDropdowns((prev) => ({ ...prev, cooperativas: !prev.cooperativas }))
-    setIsMobileMenuOpen(!isMobileMenuOpen)
   };
   return (
     <nav className="sticky top-0 z-40 border-b backdrop-blur-sm bg-white/95" style={{ borderColor: 'var(--border)' }}>
