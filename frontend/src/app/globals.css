@@ -3,15 +3,17 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* =================================
+   VARIABLES DE COLOR - Geo Transit
+================================= */
 :root {
-  /* COLORES - Paleta personalizada Geo Transit */
   --colorPrimary: #2275C3;
   --colorSecondary: #C1DAF6;
   --colorAcentuar: #605AEA;
   --textColor: #3F4756;
   --bgGeneral: #F2F7FD;
   --cardWhite: #FFFFFF;
-  
+
   /* Semantic Colors - Light Mode */
   --background: #F2F7FD;
   --foreground: #3F4756;
@@ -78,6 +80,9 @@
   --sidebar-ring: #3b82f6;
 }
 
+/* =================================
+   THEME INLINE (shadcn/ui)
+================================= */
 @theme inline {
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
@@ -119,6 +124,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* =================================
+   BASE STYLES
+================================= */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -128,100 +136,40 @@
   }
 }
 
-/* Animation suite for UI interactions */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
+/* =================================
+   ANIMACIONES
+================================= */
+@keyframes float {0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); }}
+@keyframes slide-in-up {from {opacity:0; transform:translateY(30px);} to {opacity:1; transform:translateY(0);}}
+@keyframes glow-pulse {0%,100%{box-shadow:0 0 20px rgba(34,117,195,0.3);}50%{box-shadow:0 0 40px rgba(34,117,195,0.6);}}
+@keyframes rotate-3d {0%{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg);}100%{transform:rotateX(360deg) rotateY(360deg) rotateZ(360deg);}}
+@keyframes card-float {0%,100%{transform:translateY(0px);}50%{transform:translateY(-4px);}}
+@keyframes shimmer {0%{background-position:-1000px 0;}100%{background-position:1000px 0;}}
+@keyframes fade-in {from{opacity:0;} to{opacity:1;}}
 
-@keyframes slide-in-up {
-  from { 
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.animate-float {animation: float 3s ease-in-out infinite;}
+.animate-slide-in-up {animation: slide-in-up 0.6s ease-out;}
+.animate-glow-pulse {animation: glow-pulse 3s ease-in-out infinite;}
+.animate-rotate-3d {animation: rotate-3d 20s linear infinite;}
+.animate-card-float {animation: card-float 3s ease-in-out infinite;}
+.animate-shimmer {animation: shimmer 3s infinite;}
+.animate-fade-in {animation: fade-in 0.5s ease-out;}
 
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(34, 117, 195, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(34, 117, 195, 0.6); }
-}
+/* =================================
+   UTILIDADES
+================================= */
+.hoverTextAcentuar:hover {color: var(--colorAcentuar);}
+.logoGlow:hover {color: var(--colorAcentuar);}
+.btn-colorPrimary {background-color: var(--colorPrimary);}
+.hover-bgPrimary:hover {background-color: var(--colorPrimary) !important; color: white !important;}
 
-@keyframes rotate-3d {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
-}
-
-@keyframes card-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-slide-in-up {
-  animation: slide-in-up 0.6s ease-out;
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 3s ease-in-out infinite;
-}
-
-.animate-rotate-3d {
-  animation: rotate-3d 20s linear infinite;
-}
-
-.animate-card-float {
-  animation: card-float 3s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 3s infinite;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out;
-}
-
-/* Utility classes for custom styling */
-.hoverTextAcentuar:hover {
-  color: var(--colorAcentuar);
-}
-
-.logoGlow:hover {
-  color: var(--colorAcentuar);
-}
-
-.btn-colorPrimary {
-  background-color: var(--colorPrimary);
-}
-
-.hover-bgPrimary:hover {
-  background-color: var(--colorPrimary) !important;
-  color: white !important;
-}
-
-
-
-/* Input autofill styles */
+/* Input autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px var(--input) inset !important;
   -webkit-text-fill-color: var(--foreground) !important;
+}
+input:-webkit-autofill::first-line {
+  font-size: 16px;
 }
