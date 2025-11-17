@@ -21,9 +21,8 @@ function useIsMobile() {
 }
 
 const Navbar = () => {
-  const isMobile = useIsMobile();
   const router = useRouter();
-  const { isLoggedIn, logout } = useAuth();
+  const { logout } = useAuth();
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({
     cooperativas: false,
     rutas: false,
@@ -34,7 +33,7 @@ const Navbar = () => {
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const closeTimerRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
-  if (!isLoggedIn) return null;
+ 
 
   const handleLogout = () => {
     logout();
@@ -54,23 +53,29 @@ const Navbar = () => {
     }, 150);
   };
 
+  const limpiarDropdown = () => {
+    setOpenDropdowns((prev) => ({ ...prev, cooperativas: !prev.cooperativas }))
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+  };
   return (
     <nav className="sticky top-0 z-40 border-b backdrop-blur-sm bg-white/95" style={{ borderColor: 'var(--border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          
+
           {/* Logo Section */}
           <div
             className="flex cursor-pointer items-center gap-8"
-            onClick={() => router.push('/dashboard')}
           >
-            <div className="flex items-baseline gap-1 group">
+            <div className="flex items-baseline gap-1 group"
+
+              onClick={() => router.push('/dashboard')}
+            >
               <span className="text-xl font-normal" style={{ color: '#000000' }}>Geo</span>
               <span className="text-xl font-semibold transition-colors group-hover:text-accent" style={{ color: 'var(--colorPrimary)' }}>Transit</span>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex gap-1">
+            <div className="hidden md:flex desktop-navbar gap-1">
               {/* Cooperativas */}
               <div
                 className="relative"
@@ -83,25 +88,28 @@ const Navbar = () => {
                 <button
                   className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
                   style={{ color: 'var(--foreground)' }}
+
                 >
                   <Building2 className="w-4 h-4 group-hover:text-primary transition-colors" />
                   <span>Cooperativas</span>
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdowns.cooperativas ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {/* Dropdown */}
                 {openDropdowns.cooperativas && (
                   <div
                     className="absolute left-0 mt-2 w-64 rounded-xl shadow-lg z-50 py-2 animate-fade-in border"
-                    style={{ 
-                      backgroundColor: 'var(--card)', 
+                    style={{
+                      backgroundColor: 'var(--card)',
                       borderColor: 'var(--border)'
                     }}
                   >
                     <Link
-                      href="#"
+                      href="/Cooperativa/Agregar_Cooperativas"
                       className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
-                      style={{ color: 'var(--foreground)' }}
+                      style={{
+                        color: 'var(--foreground)'
+                      }}
                     >
                       <div className="font-semibold">Cooperativa</div>
                       <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
@@ -139,13 +147,13 @@ const Navbar = () => {
                   <span>Rutas</span>
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdowns.rutas ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {/* Dropdown */}
                 {openDropdowns.rutas && (
                   <div
                     className="absolute left-0 mt-2 w-64 rounded-xl shadow-lg z-50 py-2 animate-fade-in border"
-                    style={{ 
-                      backgroundColor: 'var(--card)', 
+                    style={{
+                      backgroundColor: 'var(--card)',
                       borderColor: 'var(--border)'
                     }}
                   >
@@ -190,13 +198,13 @@ const Navbar = () => {
                   <span>Bahías</span>
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdowns.bahias ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {/* Dropdown */}
                 {openDropdowns.bahias && (
                   <div
                     className="absolute left-0 mt-2 w-64 rounded-xl shadow-lg z-50 py-2 animate-fade-in border"
-                    style={{ 
-                      backgroundColor: 'var(--card)', 
+                    style={{
+                      backgroundColor: 'var(--card)',
                       borderColor: 'var(--border)'
                     }}
                   >
@@ -227,7 +235,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Section - Desktop */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex desktop-navbar items-center gap-6">
             {/* User Menu */}
             <div
               className="relative flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-lg hover:bg-secondary/30 transition-colors"
@@ -268,22 +276,23 @@ const Navbar = () => {
                   <div className="my-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
                   <div className='mr-4'>
                     <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-3 py-3 text-sm transition-all rounded-lg mx-2"
-                    style={{ color: 'var(--destructive)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Cerrar sesión</span>
-                  </button>
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-sm transition-all rounded-lg mx-2"
+                      style={{
+                        color: 'var(--destructive)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Cerrar sesión</span>
+                    </button>
                   </div>
-                  
+
                 </div>
               )}
             </div>
@@ -291,7 +300,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg transition-colors hover:bg-secondary/50"
+            className="mobile-navbar p-2 rounded-lg transition-colors hover:bg-secondary/50"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             style={{ color: 'var(--foreground)' }}
           >
@@ -301,7 +310,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t pb-4 animate-fade-in" style={{ borderColor: 'var(--border)' }}>
+          <div className="mobile-navbar border-t pb-4 animate-fade-in" style={{ borderColor: 'var(--border)' }}>
             <div className="py-3 space-y-2">
               {/* Mobile Cooperativas */}
               <button
@@ -317,10 +326,10 @@ const Navbar = () => {
               </button>
               {openDropdowns.cooperativas && (
                 <div className="pl-6 space-y-1">
-                  <Link href="#" className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                  <Link href="/Cooperativa/Agregar_Cooperativas" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Cooperativa
                   </Link>
-                  <Link href="#" className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Encargados
                   </Link>
                 </div>
@@ -340,10 +349,10 @@ const Navbar = () => {
               </button>
               {openDropdowns.rutas && (
                 <div className="pl-6 space-y-1">
-                  <Link href="#" className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Crear
                   </Link>
-                  <Link href="#" className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Administrar
                   </Link>
                 </div>
@@ -363,10 +372,10 @@ const Navbar = () => {
               </button>
               {openDropdowns.bahias && (
                 <div className="pl-6 space-y-1">
-                  <Link href="#" className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Crear
                   </Link>
-                  <Link href="#" className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Administrar
                   </Link>
                 </div>

@@ -173,3 +173,22 @@ input:-webkit-autofill:focus {
 input:-webkit-autofill::first-line {
   font-size: 16px;
 }
+
+
+/* Navbar Desktop - se oculta cuando la pantalla es menor a 804px */
+@media (max-width: 805px) {
+  .desktop-navbar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 805px) {
+  .mobile-navbar {
+    display: block !important;
+  }
+}
+@media (min-width: 806px) {
+  .mobile-navbar {
+    display: none !important;
+  }
+}

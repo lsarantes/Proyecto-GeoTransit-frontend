@@ -7,6 +7,7 @@ import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { ActivityCard } from '@/components/dashboard/activity-card';
 import { Building2, Map, MapPin, Users, Route } from 'lucide-react';
+import { RutaProtegida } from '@/components/RutaProtegida';
 
 const statsData = [
   {
@@ -67,18 +68,6 @@ const activityItems = [
 ];
 
 export default function DashboardPage() {
-  const { isLoggedIn } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      router.push('/login');
-    }
-  }, [isLoggedIn, router]);
-
-  if (!isLoggedIn) {
-    return null;
-  }
 
   return (
     <main className="min-h-screen bg-background">
