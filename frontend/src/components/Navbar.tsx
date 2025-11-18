@@ -54,6 +54,13 @@ const Navbar = () => {
   };
 
   const limpiarDropdown = () => {
+    setIsMobileMenuOpen(false);
+    setOpenDropdowns({
+    cooperativas: false,
+    rutas: false,
+    bahias: false,
+    usuario: false,
+  });
   };
   return (
     <nav className="sticky top-0 z-40 border-b backdrop-blur-sm bg-white/95" style={{ borderColor: 'var(--border)' }}>
@@ -66,7 +73,7 @@ const Navbar = () => {
           >
             <div className="flex items-baseline gap-1 group"
 
-              onClick={() => router.push('/dashboard')}
+              onClick={() => { router.push('/dashboard'); limpiarDropdown()}}
             >
               <span className="text-xl font-normal" style={{ color: '#000000' }}>Geo</span>
               <span className="text-xl font-semibold transition-colors group-hover:text-accent" style={{ color: 'var(--colorPrimary)' }}>Transit</span>
@@ -103,13 +110,13 @@ const Navbar = () => {
                     }}
                   >
                     <Link
-                      href="/Cooperativa/Agregar_Cooperativas"
+                      href="/Cooperativa/Gestionar_Cooperativa"
                       className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
                       style={{
                         color: 'var(--foreground)'
                       }}
                     >
-                      <div className="font-semibold">Cooperativa</div>
+                      <div className="font-semibold">Gestionar Cooperativa</div>
                       <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
                         Crea, edita y elimina Cooperativas
                       </div>
@@ -119,7 +126,7 @@ const Navbar = () => {
                       className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
                       style={{ color: 'var(--foreground)' }}
                     >
-                      <div className="font-semibold">Encargados</div>
+                      <div className="font-semibold">Gestionar Encargados</div>
                       <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
                         Crea, edita y elimina Encargados
                       </div>
@@ -324,11 +331,11 @@ const Navbar = () => {
               </button>
               {openDropdowns.cooperativas && (
                 <div className="pl-6 space-y-1">
-                  <Link href="/Cooperativa/Agregar_Cooperativas" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                    Cooperativa
+                  <Link href="/Cooperativa/Gestionar_Cooperativa" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                    Gestionar Cooperativa
                   </Link>
                   <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                    Encargados
+                    Gestionar Encargados
                   </Link>
                 </div>
               )}

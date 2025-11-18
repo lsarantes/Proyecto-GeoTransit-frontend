@@ -5,6 +5,6 @@ export const metadata = {
   description: 'Sistema de gestión de cooperativas',
 }
 
-export default function Home() {
+export default function CooperativasPageRoute() {
   return <CooperativasPage />
 }

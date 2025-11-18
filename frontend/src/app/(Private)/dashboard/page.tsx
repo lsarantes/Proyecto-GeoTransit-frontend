@@ -1,13 +1,9 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { ActivityCard } from '@/components/dashboard/activity-card';
 import { Building2, Map, MapPin, Users, Route } from 'lucide-react';
-import { RutaProtegida } from '@/components/RutaProtegida';
 
 const statsData = [
   {
