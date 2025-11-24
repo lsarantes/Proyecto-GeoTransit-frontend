@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 interface Cooperativa {
-  id: number;
+  id: string;
   nombre: string;
   encargado: string;
   rutas: number;
@@ -64,9 +64,9 @@ export function useCooperativas() {
 
   const stateCoops: Cooperativa[] = [];
 
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 15000; i++) {
     stateCoops.push({
-      id: i + 1,
+      id: (i + 1).toString(),
       nombre: `Cooperativa ${baseCoops[i % baseCoops.length]}`,
       encargado: encargados[i % encargados.length],
       rutas: Math.floor(Math.random()*1000) + 1, // rutas entre 1 y 1000
