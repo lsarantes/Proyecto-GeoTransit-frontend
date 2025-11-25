@@ -122,8 +122,7 @@ export default function CooperativasPage() {
   // ---------- HANDLERS ----------
   const onCreate = (data: Omit<Cooperativa, "id">) => {
     console.log("CREAR:", data);
-
-    // Ejemplo: Generar ID temporal
+    
     const newItem: Cooperativa = {
       id: (cooperativas.length +1 ).toString(),
       ...data,

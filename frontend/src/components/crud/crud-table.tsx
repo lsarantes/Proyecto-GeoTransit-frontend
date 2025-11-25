@@ -13,7 +13,7 @@ import {
 import {
     Select,
     SelectContent,
-    SelectItem,A
+    SelectItem,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
