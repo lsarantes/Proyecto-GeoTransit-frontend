@@ -35,7 +35,7 @@ export type CrudPageProps<T> = {
     searchKeys: (keyof T)[];
     columns: TableColumn<T>[];
     // handlers that the parent (entity page) provides
-    onCreate: (data: Omit<T, "id">) => void;
+    onCreate: (data: T) => void;
     onUpdate: (data: T) => void;
     onDelete: (id: string) => void;
     modalFields: FieldConfig<T> []
