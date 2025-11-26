@@ -1,3 +1,4 @@
+import { Bahias, empleado } from "@/types/interface-bahias";
 import { useState } from "react";
 
 // --- TIPOS ADICIONALES (Prisma Enums) ---
@@ -5,108 +6,117 @@ type TD_Estado_Ubicacion = "ACTIVO" | "INACTIVO" | "DESCONOCIDO";
 type TD_Estado_Bus = "OPERATIVO" | "MANTENIMIENTO" | "FUERA_DE_SERVICIO";
 
 // Interfaz de la entidad Bus
-interface Bus {
-  id: string; // Placa/ID
-  modelo: string;
-  velocidad: number;
-  capacidad_de_pasajeros: number;
-  latitud_actual: number;
-  longitud_actual: number;
-  fecha_hora_ultima_ubicacion: Date; 
-  estado_ubicacion: TD_Estado_Ubicacion;
-  estado_bus: TD_Estado_Bus;
-}
 
-export function useBuses() {
+
+export function useBahias() {
   // --- 1. Arrays de Datos de Ejemplo (20 Elementos c/u) ---
 
-  const busIds = [
-    "ABC-101", "DEF-202", "GHI-303", "JKL-404", "MNO-505", "PQR-606", "STU-707", "VWX-808", "YZA-909", "BCD-010",
-    "EFG-111", "HIJ-222", "KLM-333", "NOP-444", "QRS-555", "TUV-666", "WXY-777", "ZAB-888", "CDE-999", "FGH-000", 
-  ];
+// 1. Identificadores únicos de las bahías (20 elementos)
+const id: string[] = [
+    "BAH-A01", "BAH-B02", "BAH-C03", "BAH-D04", "BAH-E05", "BAH-F06", "BAH-G07", "BAH-H08", "BAH-I09", "BAH-J10",
+    "BAH-K11", "BAH-L12", "BAH-M13", "BAH-N14", "BAH-O15", "BAH-P16", "BAH-Q17", "BAH-R18", "BAH-S19", "BAH-T20",
+];
 
-  const modelos = [
-    "Volvo 9800", "Mercedes Benz O500RSD", "Irizar i8", "Scania K360", "Busscar Vissta", "Marcopolo Paradiso G8", "King Long XMQ6127", 
-    "Yutong ZK6122H", "Man Lion's Coach", "Setra S 517 HD", "Volvo B8R", "Mercedes Benz Sprinter", "Blue Bird Vision", 
-    "Freightliner C2", "Navistar IC Bus", "BYD K9", "Foton AUV", "Higer Bus", "Golden Dragon XML6122", "Chevrolet L-Max",
-  ];
+// 2. Coordenadas de ubicación (Latitud)
+// Nota: La estructura final es { lat: number; lng: number }
+const latitud_actual: number[] = [
+    12.1550, 12.1280, 12.0890, 12.1000, 12.1670, 12.1500, 12.1700, 12.1800, 12.1300, 12.1150,
+    12.1450, 12.1600, 12.1050, 12.1100, 12.1750, 12.1350, 12.0950, 12.1850, 12.1200, 12.1400,
+];
 
-  const capacidades = [
-    40, 45, 50, 55, 60, 42, 48, 52, 58, 62, 35, 41, 46, 51, 56, 61, 44, 49, 53, 59
-  ];
-  
-  // Coordenadas iniciales variadas (Latitud)
-  const latitud_actual = [
-    40.4168, 41.3851, 37.3891, 39.4699, 43.2630, 36.7213, 42.8805, 39.5694, 38.3452, 41.6488,
-    38.0000, 42.5000, 37.5000, 39.0000, 43.5000, 36.5000, 42.0000, 39.7500, 38.5000, 41.0000,
-  ];
+// 3. Coordenadas de ubicación (Longitud)
+// Nota: La estructura final es { lat: number; lng: number }
+const longitud_actual: number[] = [
+    -86.2690, -86.2750, -86.2400, -86.3000, -86.2950, -86.2500, -86.2600, -86.2700, -86.2800, -86.2550,
+    -86.2850, -86.2900, -86.2450, -86.3050, -86.2750, -86.2800, -86.2650, -86.2950, -86.2700, -86.2850,
+];
 
-  // Coordenadas iniciales variadas (Longitud)
-  const longitud_actual = [
-    -3.7038, 2.1734, -5.9845, -0.3774, -2.9340, -4.4203, -8.5463, 2.6501, -0.4810, -0.8891,
-    -1.5000, 0.5000, -6.0000, -0.7500, -3.2500, -5.5000, -9.0000, 2.0000, -1.0000, -0.5000,
-  ];
-  
-  const velocidades = [
-    10.5, 35.0, 5.2, 70.1, 85.9, 0.0, 55.4, 22.3, 48.7, 7.6,
-    90.1, 15.3, 65.8, 1.1, 30.9, 75.0, 50.2, 88.0, 12.7, 60.5,
-  ];
+// 4. URL de la foto de la bahía (20 elementos)
+const url_foto: string[] = [
+    "https://mifoto.com/bahia/mga-central.jpg", "https://mifoto.com/bahia/oriental-norte.jpg", "https://mifoto.com/bahia/nicaragua-libertad.jpg", 
+    "https://mifoto.com/bahia/puerto-salida.jpg", "https://mifoto.com/bahia/metrocentro-parada.jpg", "https://mifoto.com/bahia/terminal-sur.jpg", 
+    "https://mifoto.com/bahia/aeropuerto.jpg", "https://mifoto.com/bahia/universidad-1.jpg", "https://mifoto.com/bahia/mercado-huembes.jpg", 
+    "https://mifoto.com/bahia/centro-historico.jpg", "https://mifoto.com/bahia/costanera.jpg", "https://mifoto.com/bahia/central-park.jpg", 
+    "https://mifoto.com/bahia/city-mall.jpg", "https://mifoto.com/bahia/lago-xolotlan.jpg", "https://mifoto.com/bahia/puerto-cabezas.jpg", 
+    "https://mifoto.com/bahia/san-juan-sur.jpg", "https://mifoto.com/bahia/masaya-park.jpg", "https://mifoto.com/bahia/leon-terminal.jpg", 
+    "https://mifoto.com/bahia/granada-bus.jpg", "https://mifoto.com/bahia/chinandega.jpg",
+];
 
-  // Alternamos entre estados del bus
-  const estadosBus: TD_Estado_Bus[] = [
-    "OPERATIVO", "OPERATIVO", "MANTENIMIENTO", "FUERA_DE_SERVICIO", "OPERATIVO", "OPERATIVO", "OPERATIVO", "MANTENIMIENTO", "OPERATIVO", "OPERATIVO",
-    "OPERATIVO", "OPERATIVO", "FUERA_DE_SERVICIO", "MANTENIMIENTO", "OPERATIVO", "OPERATIVO", "OPERATIVO", "OPERATIVO", "FUERA_DE_SERVICIO", "OPERATIVO",
-  ];
-  
-  // Alternamos entre estados de ubicación (GPS)
-  const estadosUbicacion: TD_Estado_Ubicacion[] = [
-    "ACTIVO", "ACTIVO", "INACTIVO", "ACTIVO", "ACTIVO", "INACTIVO", "ACTIVO", "DESCONOCIDO", "ACTIVO", "ACTIVO",
-    "ACTIVO", "INACTIVO", "ACTIVO", "INACTIVO", "ACTIVO", "ACTIVO", "ACTIVO", "DESCONOCIDO", "ACTIVO", "ACTIVO",
-  ];
+// 5. Fecha de creación (20 elementos, formato string ISO)
+const fecha_creada: string[] = [
+    "2024-10-20T10:00:00Z", "2024-10-21T11:30:00Z", "2024-10-22T14:45:00Z", "2024-10-23T08:20:00Z", "2024-10-24T17:15:00Z",
+    "2024-10-25T09:00:00Z", "2024-10-26T13:30:00Z", "2024-10-27T16:00:00Z", "2024-10-28T10:10:00Z", "2024-10-29T12:00:00Z",
+    "2024-10-30T07:45:00Z", "2024-10-31T15:00:00Z", "2024-11-01T11:00:00Z", "2024-11-02T16:30:00Z", "2024-11-03T08:00:00Z",
+    "2024-11-04T14:00:00Z", "2024-11-05T09:30:00Z", "2024-11-06T17:00:00Z", "2024-11-07T13:45:00Z", "2024-11-08T10:20:00Z",
+];
 
-  // Fechas recientes variadas
-  const fechasUltimaUbicacionString = [
-    "2025-11-25T17:00:00Z", "2025-11-25T16:45:00Z", "2025-11-25T15:30:00Z", "2025-11-24T12:00:00Z", "2025-11-23T09:00:00Z",
-    "2025-11-25T18:00:00Z", "2025-11-25T18:05:00Z", "2025-11-25T18:10:00Z", "2025-11-24T19:30:00Z", "2025-11-25T17:55:00Z",
-    "2025-11-25T17:35:00Z", "2025-11-25T16:00:00Z", "2025-11-25T14:00:00Z", "2025-11-24T10:00:00Z", "2025-11-23T11:00:00Z",
-    "2025-11-25T18:15:00Z", "2025-11-25T18:20:00Z", "2025-11-25T18:25:00Z", "2025-11-24T20:30:00Z", "2025-11-25T17:50:00Z",
-  ];
+// 6. Rutas Asociadas (20 elementos, tipo Array de objetos)
+const rutasAsociadas = [
+    { value: "R-101", label: "Managua - León" },
+    { value: "R-102", label: "Managua - Granada" },
+    { value: "R-103", label: "Managua - Masaya" },
+    { value: "R-104", label: "Managua - Estelí" },
+    { value: "R-105", label: "Managua - Chinandega" },
+    { value: "R-106", label: "Managua - Rivas" },
+    { value: "R-107", label: "Managua - Bluefields" },
+    { value: "R-108", label: "Managua - Juigalpa" },
+    { value: "R-109", label: "Managua - Puerto Cabezas" },
+    { value: "R-110", label: "Managua - Jinotega" },
+];
 
+
+
+// 8. Nombre del Empleado MTI (20 elementos)
+const empleado_mti: empleado[] = [
+    { label: "Martín Alfonso D.", value: "EMP-365"  },
+    { label: "Silvia Rosa E." , value: "EMP-366" },
+ 
+    
+];
+// 9. Conteo de pasajeros (simulando cantidad en un día, 20 elementos)
+const pasajeros: string[] = [
+    "120", "95", "210", "55", "300", "150", "40", "88", "190", "65",
+    "110", "135", "180", "70", "250", "160", "50", "105", "175", "90",
+];
   // --- 2. Generación de Registros (15,000) ---
 
-  const stateBuses: Bus[] = [];
 
-  const ARRAY_LENGTH = busIds.length; // Usaremos 20
+const getRandomrutas = () => {
+      const shuffled = [...rutasAsociadas].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, Math.floor(Math.random() * 7) + 1);
+    };
+
+  const stateBahias: Bahias[] = [];
+
+  const ARRAY_LENGTH = id.length; // Usaremos 20
 
   for (let i = 0; i < 15000; i++) {
     const index = i % ARRAY_LENGTH;
     
     // Convertir el string de fecha a un objeto Date antes de asignarlo
-    const dateString = fechasUltimaUbicacionString[index];
+    const dateString = fecha_creada[index];
     const ultimaUbicacionDate = new Date(dateString);
     
-    stateBuses.push({
-      id: busIds[index] + "-" + String(i + 1).padStart(5, '0'), 
-      modelo: modelos[index],
-      velocidad: velocidades[index],
-      capacidad_de_pasajeros: capacidades[index],
-      
+    stateBahias.push({
+      id: id[index] + "-" + String(i + 1).padStart(5, '0'), 
+      url_foto: url_foto[i % url_foto.length],
+      pasajeros: pasajeros[i %pasajeros.length],
+      empleado_mti: empleado_mti[Math.floor(Math.random() * empleado_mti.length)],
       // Coordenadas
-      latitud_actual: latitud_actual[index],
-      longitud_actual: longitud_actual[index],
-      
+      posicion_ubicacion:{
+      lat: latitud_actual[i % latitud_actual.length],
+      lng: longitud_actual[i % longitud_actual.length],
+      },
       // Conversión resuelta
-      fecha_hora_ultima_ubicacion: ultimaUbicacionDate, 
+      fecha_creada: fecha_creada[i % fecha_creada.length], 
+      rutasAsociadas: getRandomrutas(),
       
-      // Estados
-      estado_ubicacion: estadosUbicacion[index],
-      estado_bus: estadosBus[index],
     });
   }
 
   // --- 3. Hook de Estado ---
 
-  const [buses, setBuses] = useState<Bus[]>(stateBuses);
+  const [bahias, setBahias] = useState<Bahias[]>(stateBahias);
 
-  return { buses, setBuses }; 
+  return { bahias, setBahias, rutasAsociadas, empleado_mti,  }; 
 }

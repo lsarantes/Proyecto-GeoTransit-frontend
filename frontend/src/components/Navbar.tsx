@@ -214,7 +214,7 @@ const Navbar = () => {
                     }}
                   >
                     <Link
-                      href="/Buses"
+                      href="/Bahias"
                       className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
                       style={{ color: 'var(--foreground)' }}
                     >
@@ -224,7 +224,7 @@ const Navbar = () => {
                       </div>
                     </Link>
                     <Link
-                      href="/Buses"
+                      href="/Bahias"
                       className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
                       style={{ color: 'var(--foreground)' }}
                     >
