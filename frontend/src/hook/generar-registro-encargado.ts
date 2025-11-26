@@ -1,29 +1,30 @@
 import { useState } from "react";
 
-interface Cooperativa {
+interface Encargado {
   id: string;
   nombre: string;
-  encargado: string;
-  rutas: number;
-  telefono: string;
+  correo: string;
   direccion: string;
+  telefono: string;
+  foto: string;
 }
 
-export function useCooperativas() {
-  const baseCoops = [
-    "Central",
-    "del Norte",
-    "del Sur",
-    "del Levante",
-    "Andaluza",
-    "del Este",
-    "Atlántica",
-    "Pirenaica",
-    "Mediterránea",
-    "Castellana",
+
+export function useEncargado() {
+  const correo = [
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
+    "edgard@gmail.com",
   ];
 
-  const encargados = [
+  const nombre = [
     "Juan Pérez",
     "María García",
     "Carlos López",
@@ -34,19 +35,6 @@ export function useCooperativas() {
     "Elena Fernández",
     "Diego Iglesias",
     "Sofía Herrera",
-  ];
-
-  const telefonos = [
-    "+34 912 345 678",
-    "+34 934 567 890",
-    "+34 955 123 456",
-    "+34 963 234 567",
-    "+34 957 654 321",
-    "+34 973 456 789",
-    "+34 981 567 234",
-    "+34 974 321 654",
-    "+34 965 123 789",
-    "+34 921 654 987",
   ];
 
   const direcciones = [
@@ -62,20 +50,46 @@ export function useCooperativas() {
     "Plaza Mayor 444, Segovia",
   ];
 
-  const stateCoops: Cooperativa[] = [];
+  const telefonos = [
+    "+34 912 345 678",
+    "+34 934 567 890",
+    "+34 955 123 456",
+    "+34 963 234 567",
+    "+34 957 654 321",
+    "+34 973 456 789",
+    "+34 981 567 234",
+    "+34 974 321 654",
+    "+34 965 123 789",
+    "+34 921 654 987",
+  ];
 
-  for (let i = 0; i < 150; i++) {
+  const URL = [
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+    "https://robohash.org/edgard2?set=set4",
+  ];
+
+  const stateCoops: Encargado[] = [];
+
+  for (let i = 0; i < 15000; i++) {
     stateCoops.push({
       id: (i + 1).toString(),
-      nombre: `Cooperativa ${baseCoops[i % baseCoops.length]}`,
-      encargado: encargados[i % encargados.length],
-      rutas: Math.floor(Math.random()*1000) + 1, // rutas entre 1 y 1000
-      telefono: telefonos[i % telefonos.length],
+      nombre: nombre[i % nombre.length],
+      correo: correo[i % correo.length],
       direccion: direcciones[i % direcciones.length],
+      telefono: telefonos[i % telefonos.length],
+      foto: URL[i % URL.length], 
     });
   }
 
-  const [cooperativas, setCooperativas] = useState<Cooperativa[]>(stateCoops);
+  const [encargado, setEncargado] = useState<Encargado[]>(stateCoops);
 
-  return { cooperativas, setCooperativas };
+  return { encargado, setEncargado };
 }
