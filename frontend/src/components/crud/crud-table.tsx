@@ -66,9 +66,9 @@ export function CrudTable<T extends { id: string }>({
         const styles: Record<EstadosDefinidos, string> = {
             positive: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100", // Activo
             negative: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100",       // Fuera de servicio
-            regular:  "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100", // Mantenimiento
-            neutral:  "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100", // Desconocido
-            personalizado:  "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100", // Desconocido
+            regular: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100", // Mantenimiento
+            neutral: "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100", // Desconocido
+            personalizado: "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100", // Desconocido
         };
 
         return `${base} ${styles[level] || styles.neutral} ${customClass}`;
@@ -79,8 +79,8 @@ export function CrudTable<T extends { id: string }>({
         const colors: Record<EstadosDefinidos, string> = {
             positive: "bg-emerald-500",
             negative: "bg-red-500",
-            regular:  "bg-amber-500",
-            neutral:  "bg-slate-400",
+            regular: "bg-amber-500",
+            neutral: "bg-slate-400",
             personalizado: "bg-emerald-500"
         };
         return <span className={`w-1.5 h-1.5 rounded-full ${colors[level] || colors.neutral}`} />;
@@ -119,8 +119,7 @@ export function CrudTable<T extends { id: string }>({
                     items.map((item) => (
                         <div
                             key={item.id}
-                            className={`group rounded-xl border transition-all duration-300 overflow-hidden ${
-                                expandedId === item.id
+                            className={`group rounded-xl border transition-all duration-300 overflow-hidden ${expandedId === item.id
                                     ? "border-[var(--colorPrimary)] shadow-md bg-white ring-1 ring-[var(--colorPrimary)]/20"
                                     : "border-[var(--colorSecondary)] bg-white shadow-sm hover:shadow-md"
                                 }`}
@@ -598,18 +597,32 @@ export function CrudTable<T extends { id: string }>({
                                             }
                                             return (
                                                 <TableCell key={col.key as string} className={col.classNameText}>
-                                                    {/* Guardamos el valor en una variable para chequearlo una sola vez */}
                                                     {(() => {
                                                         const cellValue = item[col.key];
 
-                                                        // 1. CHEQUEO: Si es un objeto Y no es nulo/array (typeof array también es 'object')
-                                                        if (typeof cellValue === 'object' && cellValue !== null && !Array.isArray(cellValue)) {
-                                                            // 2. EXTRACCIÓN: Devolvemos la propiedad 'label'
-                                                            // Agregamos un chequeo opcional (?) por seguridad
-                                                            return cellValue.label ?? 'N/A';
+                                                        // 1. Si es null o undefined, retorna cadena vacía o guión
+                                                        if (cellValue === null || cellValue === undefined) return 'N/A';
+
+                                                        // 2. Si es un objeto (y no es array, y no es null)
+                                                        if (typeof cellValue === 'object' && !Array.isArray(cellValue)) {
+
+                                                            // A) Intentamos buscar la propiedad 'label' explícitamente
+                                                            if ('label' in cellValue) {
+                                                                // Forzamos a que sea string o devolvemos N/A si label es null
+                                                                return (cellValue as any).label ?? 'N/A';
+                                                            }
+
+                                                            // B) Si no tiene label pero tiene value
+                                                            if ('value' in cellValue) {
+                                                                return (cellValue as any).value;
+                                                            }
+
+                                                            // C) SEGURIDAD: Si es un objeto desconocido, NO lo devuelvas crudo.
+                                                            // Conviértelo a string para evitar el crash de React.
+                                                            return JSON.stringify(cellValue);
                                                         }
 
-                                                        // 3. DEFAULT: Si es string, número o null, lo devolvemos directo
+                                                        // 3. Si es un primitivo (string, number, boolean), devuélvelo.
                                                         return cellValue;
                                                     })()}
                                                 </TableCell>
