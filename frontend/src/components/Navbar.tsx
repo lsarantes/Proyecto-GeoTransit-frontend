@@ -271,7 +271,7 @@ const Navbar = () => {
                   }}
                 >
                   <Link
-                    href="#"
+                    href="/configPerfil"
                     className="flex items-center gap-3 px-4 py-3 text-sm transition-all rounded-lg mx-2 hover:bg-secondary/40"
                     style={{ color: 'var(--foreground)' }}
                   >
