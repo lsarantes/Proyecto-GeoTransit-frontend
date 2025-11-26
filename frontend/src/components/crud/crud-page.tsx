@@ -2,7 +2,7 @@
 "use client";
 //IMPORTACIONES EXTERNAS
 import { useEffect, useState } from "react";
-import { Search, Plus, Loader, AlertCircle, ChevronLeft, ChevronRight, LucideProps } from 'lucide-react';
+import { Search, Plus, Loader, AlertCircle, ChevronLeft, ChevronRight, LucideProps, Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,6 +28,8 @@ import { ItemDetailsModal } from "./crud-details-modal";
 import { CrudPageProps } from "@/types/crud-interface-types";
 import { TypeLevel } from "@/types/type-level";
 import { PaginationControls } from "./pagination-controls";
+import { LocationModal } from "./location-modal";
+import { AllLocationsModal } from "./all-location-modal";
 
 function filterItems<T>(
     items: T[],
@@ -86,6 +88,9 @@ export function CrudPage<T extends { id: string }>({
     const [editingItem, setEditingItem] = useState<T | null>(null);
     const [viewingItem, setViewingItem] = useState<T | null>(null);
     const [deletingItem, setDeletingItem] = useState<T | null>(null);
+    const [viewingLocation, setViewingLocation] = useState<any>(null); // State for single location
+    const [viewingAllLocations, setViewingAllLocations] = useState(false); // State for all locations map
+
     const firstImportantCol = columns.find(c => c.level === TypeLevel.titulo);
 
 
@@ -192,33 +197,47 @@ export function CrudPage<T extends { id: string }>({
                             className="pl-10 border-[var(--colorSecondary)] focus:border-[var(--colorPrimary)] bg-white text-[var(--textColor)] placeholder:text-[var(--textColor)]/40 transition-all"
                         />
                     </div>
+                    <div className="flex flex-col md:flex-row gap-2">
 
-                    <Button
-                        onClick={openFormForNew}
-                        className="bg-gradient-to-r from-[var(--colorPrimary)] to-[var(--colorAcentuar)] hover:from-[#1a5a9f] hover:to-[#4a449a] text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg"
-                    >
-                        <Plus size={20} />
-                        Agregar {identity}
-                    </Button>
+                        <Button
+                            onClick={openFormForNew}
+                            className="bg-gradient-to-r from-[var(--colorPrimary)] to-[var(--colorAcentuar)] hover:from-[#1a5a9f] hover:to-[#4a449a] text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg"
+                        >
+                            <Plus size={20} />
+                            Agregar {identity}
+                        </Button>
+                        <Button onClick={() => setViewingAllLocations(true)} variant="secondary" className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-200">
+                            <Globe className="w-4 h-4 mr-2" /> Ver todas las ubicaciones
+                        </Button>
+                    </div>
+
                 </div>
 
                 {/* Form Modal */}
+
                 <Dialog open={showForm} onOpenChange={closeForm}>
-                    <DialogContent className="max-w-2xl border-[var(--colorSecondary)] rounded-lg shadow-xl">
-                        <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-[var(--textColor)] flex items-center gap-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-[var(--colorPrimary)] to-[var(--colorAcentuar)] rounded-lg flex items-center justify-center">
-                                    <Plus className="w-4 h-4 text-white" />
+                    <DialogContent className="max-w-4xl p-0 gap-0 border-slate-200 rounded-xl shadow-2xl overflow-hidden bg-white">
+                        {/* HEADER CON FONDO SUTIL */}
+                        <DialogHeader className="px-6 py-5 bg-slate-50/50 border-b border-slate-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm">
+                                    <div className="w-8 h-8 bg-blue-50 rounded-md flex items-center justify-center text-blue-600">
+                                        <Plus className="w-5 h-5" />
+                                    </div>
                                 </div>
-                                {editingItem ? "Editar " + identity : "Agregar Nueva " + identity}
-                            </DialogTitle>
-                            <DialogDescription className="text-[var(--textColor)]/60">
-                                {editingItem
-                                    ? "Actualiza los datos de la " + identity
-                                    : "Completa los campos para registrar una nueva " + identity}
-                            </DialogDescription>
+                                <div className="space-y-0.5">
+                                    <DialogTitle className="text-xl font-bold text-slate-800 tracking-tight">
+                                        {editingItem ? `Editar ${identity}` : `Agregar Nueva ${identity}`}
+                                    </DialogTitle>
+                                    <DialogDescription className="text-slate-500 text-sm">
+                                        Ingresa la información requerida a continuación.
+                                    </DialogDescription>
+                                </div>
+                            </div>
                         </DialogHeader>
-                        <CrudModal <T>
+
+                        {/* FORMULARIO */}
+                        <CrudModal
                             onSubmit={handleSaveItem}
                             onCancel={closeForm}
                             initialData={editingItem || undefined}
@@ -228,13 +247,15 @@ export function CrudPage<T extends { id: string }>({
                     </DialogContent>
                 </Dialog>
 
+
                 {/* Table */}
                 <CrudTable
                     originalItems={items}
                     filteredItems={filteredItems}
                     onEdit={openFormForEdit}
-                    onDelete={(id) => setDeletingItem(items.find(c => c.id === id) || null)}
+                    onDelete={(id: string) => setDeletingItem(items.find(c => c.id === id) || null)}
                     onView={setViewingItem}
+                    onViewLocation={setViewingLocation}
                     handleItemsPerPageChange={handleItemsPerPageChange}
                     searchTerm={searchTerm}
                     currentPage={currentPage}
@@ -246,7 +267,7 @@ export function CrudPage<T extends { id: string }>({
 
                 {/* Pagination and Info Footer */}
                 {filteredItems.length > 0 && (
-                   <PaginationControls 
+                    <PaginationControls
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
@@ -254,13 +275,29 @@ export function CrudPage<T extends { id: string }>({
 
 
                 )}
+                {viewingLocation && (
+                    <LocationModal
+                        item={viewingLocation}
+                        columns = {columns}
+                        onClose={() => setViewingLocation(null)}
 
+                    />
+                )}
+
+                {/* Nuevo Modal para ver mapa general */}
+                {viewingAllLocations && (
+                    <AllLocationsModal
+                        items={items}
+                        columns={columns}
+                        onClose={() => setViewingAllLocations(false)}
+                    />
+                )}
 
 
                 {/* View Details Dialog */}
                 <Dialog open={!!viewingItem} onOpenChange={(open) => !open && setViewingItem(null)}>
                     <DialogContent className="max-w-4xl w-[95vw] h-[90vh] flex flex-col border-[var(--colorSecondary)] rounded-xl shadow-2xl bg-white/95 backdrop-blur-sm p-0 gap-0 overflow-hidden [&_button[data-slot='dialog-close']]:z-20">
-                     
+
                         <DialogHeader className="px-6 pt-6 pb-4 shrink-0 border-b border-[var(--colorSecondary)]/20 bg-white/50 backdrop-blur-md z-10">
                             <DialogTitle className="text-[var(--textColor)] flex items-center gap-3 text-xl font-bold">
                                 <div className="w-10 h-10 bg-gradient-to-br from-[var(--colorPrimary)]/10 to-[var(--colorAcentuar)]/10 rounded-xl flex items-center justify-center border border-[var(--colorPrimary)]/20 shadow-sm">

@@ -1,0 +1,1 @@
+export type EstadosDefinidos = 'positive' | 'negative' | 'regular' | 'neutral' | 'personalizado';
