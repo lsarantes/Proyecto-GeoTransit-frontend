@@ -3,6 +3,7 @@
 import { useEncargado } from "@/hook/generar-registro-encargado";
 import {
   BookImage,
+  Camera,
   CircleUser,
   Hash,
   Mail,
@@ -27,22 +28,18 @@ import {
 } from "@/types/regular-expresion";
 import { TypeLevel } from "@/types/type-level";
 import { useState } from "react";
+import { Encargado } from "@/types/interface-encargado";
 
-// Tipo de la entidad
-interface Encargado {
-  id: string;
-  nombre: string;
-  correo: string;
-  direccion: string;
-  telefono: string;
-  foto: string;
-}
 
-// Hook de ejemplo (tú ya lo tienes)
 
 export default function EncargadoPage() {
-  // Load items
-  const {encargado, setEncargado} = useEncargado();
+  
+  const {encargado, setEncargado, rol} = useEncargado();
+
+  const opcionesParaSelect = rol.map(palabra => ({
+    label: palabra, 
+    value: palabra, 
+}));
 
   // ---------- TABLE COLUMNS ----------
   const columns: TableColumn<Encargado>[] = [
@@ -57,10 +54,10 @@ export default function EncargadoPage() {
     {
       key: "foto",
       label: "Foto",
-      level: TypeLevel.textRelevante,
+      level: TypeLevel.foto,
       classNameTitle: DefaultStylesTableTitle.centerTitle,
-      classNameText: DefaultStylesTableContent.resaltado,
-      Icon: BookImage,
+      classNameText: DefaultStylesTableContent.foto,
+      Icon: Camera,
     },
     {
       key: "nombre",
@@ -71,11 +68,19 @@ export default function EncargadoPage() {
       Icon: CircleUser,
     },
     {
-      key: "correo",
-      label: "Correo",
+      key: "rol",
+      label: "Rol",
       level: TypeLevel.subtitulo,
       classNameTitle: DefaultStylesTableTitle.normalTitle,
       classNameText: DefaultStylesTableContent.subtitulo,
+      Icon: Camera,
+    },
+    {
+      key: "correo",
+      label: "Correo",
+      level: TypeLevel.textNormal,
+      classNameTitle: DefaultStylesTableTitle.normalTitle,
+      classNameText: DefaultStylesTableContent.text,
       Icon: Mail,
     },
     {
@@ -177,16 +182,17 @@ export default function EncargadoPage() {
       },
     },
     {
-      key: "foto",
-      label: "Seleccione su foto",
-      placeholder: "",
-      type: "number",
-      pattern: "",
+      key: "rol",
+      label: "Rol",
+      type: "select",
       layout: "grid",
-      inputMode: "search",
-      validate: (value) => {
-        return null;
-      },
+      options: opcionesParaSelect,
+    },
+    {
+      key: "foto",
+      label: "Fotografía",
+      type: "photo",
+      layout: "full"
     },
   ];
 

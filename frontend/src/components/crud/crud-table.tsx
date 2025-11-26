@@ -598,8 +598,23 @@ if (col.level === TypeLevel.textRelevante) {
     );
 }
                                             return (
-                                                <TableCell key={col.key as string} className={col.classNameText}>{item[col.key]}</TableCell>
-                                            );
+    <TableCell key={col.key as string} className={col.classNameText}>
+        {/* Guardamos el valor en una variable para chequearlo una sola vez */}
+        {(() => {
+            const cellValue = item[col.key];
+
+            // 1. CHEQUEO: Si es un objeto Y no es nulo/array (typeof array también es 'object')
+            if (typeof cellValue === 'object' && cellValue !== null && !Array.isArray(cellValue)) {
+                // 2. EXTRACCIÓN: Devolvemos la propiedad 'label'
+                // Agregamos un chequeo opcional (?) por seguridad
+                return cellValue.label ?? 'N/A';
+            }
+
+            // 3. DEFAULT: Si es string, número o null, lo devolvemos directo
+            return cellValue;
+        })()}
+    </TableCell>
+);
                                         })}
 
                                         <TableCell className="text-right">

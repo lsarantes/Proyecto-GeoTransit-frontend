@@ -15,8 +15,8 @@ export interface Cooperativa {
   };
   fotoUrl?: string;
   fechaCreacion: string;
-  // Campos adicionales para las funciones avanzadas
-  estado?: { label: string; value: EstadosDefinidos; className?: string };
+  codigo: string;
+  // Campos adicionales para las funciones avanzadas  
   rutasAsociadas?: { value: string; label: string }[];
 }
 
@@ -65,6 +65,10 @@ export function useCooperativas() {
       "Plaza Mayor 444, Segovia",
     ];
 
+    const codigo = [
+      "+505", 
+    ]
+
     
     const getRandomRutas = () => {
       const shuffled = [...rutasObjPosibles].sort(() => 0.5 - Math.random());
@@ -106,9 +110,9 @@ export function useCooperativas() {
         // Foto estable basada en ID
         fotoUrl: `https://picsum.photos/seed/${i + 500}/200/200`,
         fechaCreacion: getRandomDate(),
-
+        codigo: codigo[i % codigo.length],
         // Campos nuevos poblados
-        estado: estadosPosibles[Math.floor(Math.random() * estadosPosibles.length)],
+        
         rutasAsociadas: getRandomRutas()
       });
     }

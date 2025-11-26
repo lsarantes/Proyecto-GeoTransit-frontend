@@ -1,13 +1,6 @@
+import { Encargado } from "@/types/interface-encargado";
 import { useState } from "react";
 
-interface Encargado {
-  id: string;
-  nombre: string;
-  correo: string;
-  direccion: string;
-  telefono: string;
-  foto: string;
-}
 
 
 export function useEncargado() {
@@ -76,9 +69,16 @@ export function useEncargado() {
     "https://robohash.org/edgard2?set=set4",
   ];
 
+  const rol = [
+    "Encargado Cooperativa",
+    "Gestos Bahias MTI",
+    "Empleado MTI",
+    "Gestor de rutas",
+  ]
+
   const stateCoops: Encargado[] = [];
 
-  for (let i = 0; i < 15000; i++) {
+  for (let i = 0; i < 150; i++) {
     stateCoops.push({
       id: (i + 1).toString(),
       nombre: nombre[i % nombre.length],
@@ -86,10 +86,11 @@ export function useEncargado() {
       direccion: direcciones[i % direcciones.length],
       telefono: telefonos[i % telefonos.length],
       foto: URL[i % URL.length], 
+      rol: rol[i % rol.length],
     });
   }
 
   const [encargado, setEncargado] = useState<Encargado[]>(stateCoops);
 
-  return { encargado, setEncargado };
+  return { encargado, setEncargado, rol };
 }
