@@ -18,7 +18,7 @@ export interface Cooperativa {
   direccion: string;
   ubicacion: { lat: number; lng: number };
   fechaCreacion: string;
-  codigo: string;
+  estado?: { value: string; label: string; className?: string };
   rutasAsociadas?: { value: string; label: string }[];
   fotoUrl?: string;
 }
@@ -34,7 +34,7 @@ export default function CooperativasPage() {
     { key: "fotoUrl", label: "Foto", level: TypeLevel.foto, classNameTitle: DefaultStylesTableTitle.centerTitle, classNameText: DefaultStylesTableContent.foto, Icon: Camera },
     { key: "nombre", label: "Nombre", level: TypeLevel.titulo, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.titulo, Icon: Building2 },
     { key: "encargado", label: "Encargado", level: TypeLevel.subtitulo, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.subtitulo, Icon: User },
-    { key: "codigo", label: "Código", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Zap },
+    { key: "estado", label: "Estado", level: TypeLevel.textRelevante, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.resaltado, Icon: Zap },
     { key: "telefono", label: "Teléfono", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Phone },
     { key: "fechaCreacion", label: "Registro", level: TypeLevel.fecha, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Calendar },
     { key: "ubicacion", label: "Ubicación", level: TypeLevel.coordenada, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: MapIcon },
@@ -54,7 +54,7 @@ export default function CooperativasPage() {
       label: "Fotografía",
       type: "photo",
       layout: "full"
-    },    
+    },
     {
       key: "nombre",
       label: "Nombre de la Cooperativa",
@@ -78,11 +78,11 @@ export default function CooperativasPage() {
       layout: "grid"
     },
     {
-      key: "codigo",
-      label: "Código de Pais",
-      placeholder: "Ej. +505",
-      type: "text",
-      layout: "grid",      
+      key: "estado",
+      label: "Estado Operativo",
+      type: "select",
+      layout: "grid",
+      options: estadosPosibles
     },
     {
       key: "ubicacion",
