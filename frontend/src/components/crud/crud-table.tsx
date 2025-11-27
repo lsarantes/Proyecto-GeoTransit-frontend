@@ -597,22 +597,36 @@ export function CrudTable<T extends { id: string }>({
                                                 );
                                             }
                                             return (
-                                                <TableCell key={col.key as string} className={col.classNameText}>
-                                                    {/* Guardamos el valor en una variable para chequearlo una sola vez */}
-                                                    {(() => {
-                                                        const cellValue = item[col.key];
+                                             <TableCell key={col.key as string} className={col.classNameText}>
+  {(() => {
+    const cellValue = item[col.key];
 
-                                                        // 1. CHEQUEO: Si es un objeto Y no es nulo/array (typeof array también es 'object')
-                                                        if (typeof cellValue === 'object' && cellValue !== null && !Array.isArray(cellValue)) {
-                                                            // 2. EXTRACCIÓN: Devolvemos la propiedad 'label'
-                                                            // Agregamos un chequeo opcional (?) por seguridad
-                                                            return cellValue.label ?? 'N/A';
-                                                        }
+    // 1. Si es null o undefined, retorna cadena vacía o guión
+    if (cellValue === null || cellValue === undefined) return 'N/A';
 
-                                                        // 3. DEFAULT: Si es string, número o null, lo devolvemos directo
-                                                        return cellValue;
-                                                    })()}
-                                                </TableCell>
+    // 2. Si es un objeto (y no es array, y no es null)
+    if (typeof cellValue === 'object' && !Array.isArray(cellValue)) {
+      
+      // A) Intentamos buscar la propiedad 'label' explícitamente
+      if ('label' in cellValue) {
+        // Forzamos a que sea string o devolvemos N/A si label es null
+        return (cellValue as any).label ?? 'N/A';
+      }
+
+      // B) Si no tiene label pero tiene value
+      if ('value' in cellValue) {
+         return (cellValue as any).value;
+      }
+
+      // C) SEGURIDAD: Si es un objeto desconocido, NO lo devuelvas crudo.
+      // Conviértelo a string para evitar el crash de React.
+      return JSON.stringify(cellValue); 
+    }
+
+    // 3. Si es un primitivo (string, number, boolean), devuélvelo.
+    return cellValue;
+  })()}
+</TableCell>
                                             );
                                         })}
 

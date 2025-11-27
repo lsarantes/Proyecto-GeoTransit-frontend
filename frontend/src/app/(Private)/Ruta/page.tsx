@@ -2,45 +2,37 @@
 
 import { useState } from "react";
 import { useCooperativas } from "@/hook/generar-registro.tabla";
-import { Bone, Building2, Hash, MapPin, Phone, User, Zap } from 'lucide-react';
+import { Bone, Building2, BusFront, Calendar, Hash, House, HouseHeart, IdCardIcon, MapPin, Phone, User, Users, Zap } from 'lucide-react';
 import { CrudPage } from "@/components/crud/crud-page";
 import { DefaultStylesTableTitle, DefaultStylesTableContent } from "@/types/style-texto-tabla";
 import { FieldConfig, TableColumn } from "@/types/crud-interface-types";
 import { handleValidatedChange, REGEX_NUMBERS_AND_LETTERS_N_LATAM, REGEX_NUMBERS_AND_SYMBOLS, REGEX_ONLY_LETTERS_LATAM, REGEX_ONLY_NUMBERS } from "@/types/regular-expresion";
 import { TypeLevel } from "@/types/type-level";
-import { userRuta } from "@/hook/generar-registro.ruta";
+import { rutas } from "@/types/interface-rutas";
+import { useRuta } from "@/hook/generar-registro.ruta";
 
 
-// 👇 Tipo de la entidad
-interface Ruta {
-  id: string;
-  origen_latitud: number;
-  origen_longitud: number;
-  destino_latitud: number;
-  destino_longitud: number;
-  fecha_de_creacion: string;
 
-}
 
 
 // 👇 Hook de ejemplo (tú ya lo tienes)
 
 export default function RutaPage() {
   // Load items
-  const { rutas, setRutas } = userRuta();
+  const { rutas, setRutas, cooperativaAsociadas, rutasAsociadas } = useRuta();
 
   // ---------- TABLE COLUMNS ----------
-  const columns: TableColumn<Ruta>[] = [
-    { key: "id", label: "ID", level: TypeLevel.id, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.id, Icon: Hash },
-    { key: "origen_latitud", label: "Origen Y", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.titulo, Icon: Building2 },
-    { key: "origen_longitud", label: "Origen X", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.subtitulo, Icon: User },
-    { key: "destino_latitud", label: "Destino Y", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.centerTitle, classNameText: DefaultStylesTableContent.resaltado, Icon: Zap },
-    { key: "destino_longitud", label: "Destino X", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Phone },
-    { key: "fecha_de_creacion", label: "Fecha", level: TypeLevel.titulo, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: MapPin },
+  const columns: TableColumn<rutas>[] = [
+    { key: "id", label: "Nombre de Ruta", level: TypeLevel.id, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.id, Icon: IdCardIcon },
+    { key: "origen", label: "Origen de la ruta", level: TypeLevel.coordenada, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.titulo, Icon: House },
+    { key: "destino", label: "Destino de la ruta", level: TypeLevel.coordenada, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.subtitulo, Icon: HouseHeart },
+    { key: "fecha_creacion", label: "Fecha", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.centerTitle, classNameText: DefaultStylesTableContent.fecha, Icon: Calendar },
+    { key: "cooperativaAsociadas", label: "Cooperativa", level: TypeLevel.textRelevante, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Users },
+    { key: "rutasAsociadas", label: "Ruta", level: TypeLevel.textRelevante, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: BusFront },
   ];
 
   // ---------- MODAL FIELDS ----------
-  const modalFields: FieldConfig<Ruta>[] = [
+  const modalFields: FieldConfig<rutas>[] = [
     {
       key: "id",
       label: "Nombre de la Ruta",
@@ -57,98 +49,57 @@ export default function RutaPage() {
       }
     },
     {
-      key: "origen_latitud",
-      label: "latitud",
-      placeholder: "40N°",
-      type: "number",
-      layout: "grid",
-      pattern: "",
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "La latitud es requerido";
-        }
-        return null;
-      }
+      key: "origen",
+      label: "Origen de la ubicacion",
+      type: "location",
+      layout: "full",
+      validate: (val: any) => (!val || val.lat === 0) ? "Debe seleccionar una ubicación de origen en el mapa" : null
     },
     {
-      key: "origen_longitud",
-      label: "longitud",
-      placeholder: "60E°",
-      type: "text",
-      layout: "grid",
-      pattern: "",
-      inputMode: "text",
-      validate: (value) => {
-        if (value === null || value === undefined || value <= 0) {
-          return "La longitud es requerido";
-        }
-        return null;
-      }
+      key: "destino",
+      label: "Destino de la ubicacion",
+      type: "location",
+      layout: "full",
+      validate: (val: any) => (!val || val.lat === 0) ? "Debe seleccionar una ubicación de destino en el mapa" : null
+    },
+  {
+      key: "fecha_creacion",
+      label: "Fecha de Registro",
+      type: "date",
+      layout: "grid"
     },
     {
-      key: "destino_latitud",
-      label: "latitud",
-      placeholder: "60N°",
-      type: "text",
-      layout: "grid",
-      pattern: "",
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "La latitud es requerido";
-        }
-        return null;
-      }
+      key: "rutasAsociadas", 
+      label: "Asociar Rutas ",
+      type: "multiselect",
+      layout: "full",
+      options: rutasAsociadas
     },
     {
-      key: "destino_longitud",
-      label: "longitud",
-      placeholder: "50E°",
-      type: "text",
-      layout: "grid",
-      pattern: "",
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "La longitud es requerida";
-        }
-        return null;
-      }
-    },
-     {
-      key: "fecha_de_creacion",
-      label: "fecha",
-      placeholder: "25/11/2025",
-      type: "text",
-      layout: "grid",
-      pattern: "",
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "La fecha es requerida";
-        }
-        return null;
-      }
+      key: "cooperativaAsociadas", 
+      label: "Asociar Rutas",
+      type: "multiselect",
+      layout: "full",
+      options: cooperativaAsociadas
     }
 
   ];
 
   // ---------- SEARCH KEYS ----------
-  const searchKeys: (keyof Ruta)[] = ["id"];
+  const searchKeys: (keyof rutas)[] = ["id"];
 
   // ---------- HANDLERS ----------
-  const onCreate = (data: Omit<Ruta, "id">) => {
+  const onCreate = (data: Omit<rutas, "id">) => {
     console.log("CREAR:", data);
     
-    const newItem: Ruta = {
+    const newItem: rutas = {
       id: (rutas.length +1 ).toString(),
       ...data,
     };
     setRutas((prev) => [...prev, newItem]);
   };
 
-  const onUpdate = (data: Ruta) => {
+  const onUpdate = (data: rutas) => {
     console.log("UPDATE:", data);
     setRutas((prev) =>
       prev.map((item) => (item.id === data.id ? data : item))
@@ -163,7 +114,7 @@ export default function RutaPage() {
   };
 
   return (
-    <CrudPage<Ruta>
+    <CrudPage<rutas>
       title="Gestión de Rutas"
       subtitle="Administra todas tus rutas en un solo lugar"
       Icon={Building2}
