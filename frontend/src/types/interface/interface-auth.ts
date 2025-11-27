@@ -7,29 +7,48 @@ export interface LoginCredentials {
   password: string;
 }
 
-// ⚠️ Esta es la interfaz del objeto fusionado que recibes al loguearte
-export interface User {
-  // ID numérico principal (mapeado de foundUser.id_usuario)
-  id: number; 
-  id_usuario: number; // El nombre del PK de la BD (para consistencia)
+// src/types/interface/interface-user.ts (Interfaz Unificada del Usuario de Sesión)
+
+export interface IRolDetalle {
+  tipo: 'MTI' | 'COOPERATIVA' | string;
+  nivel?: string;
+}
+
+export interface ITelefono {
+  id: number;
+  no_telefonico: string;
+  compania: string;
+  persona_id: string;
+}
+
+export interface IPersonaProfile {
+  id: string;
+  nombres: string;
+  apellidos: string;
   
+  primer_nombre: string;
+  segundo_nombre?: string | null;
+  primer_apellido: string;
+  segundo_apellido?: string | null;
+
+  fotoUrl?: string | null;
+  telefonos: ITelefono[];
+}
+
+export interface User {
+  id_usuario: number;
   username: string;
   email: string;
+  isActive: boolean;
+  lastLogin: Date | string;
   
-  // Datos del perfil (fusionados de la tabla Persona)
-  nombre: string;
-  apellido?: string; 
-  role: UserRole;
-  
-  // Estado de la sesión (para el seguimiento con WebSocket)
-  estaActivo: boolean; 
-  
-  // Datos del usuario (opcional si existe en el merge)
-  nombreCompleto?: string; 
-  
-  // Opcional: f_ultimo_acceso
-  f_ultimo_acceso?: string | Date;
+  role: string;
+  detalles_rol: IRolDetalle | null; 
+
+  persona: IPersonaProfile;
 }
+
+
 
 export interface AuthResponse {
   token: string; // El JWT

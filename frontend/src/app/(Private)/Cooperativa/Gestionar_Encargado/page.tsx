@@ -2,13 +2,16 @@
 
 import { useMemo } from "react";
 import { CrudPage } from "@/components/crud/crud-page";
-import { User, Mail, Building, Hash, Camera, Calendar } from 'lucide-react';
+import { User, Mail, Building, Hash, Camera, Calendar, UserIcon } from 'lucide-react';
 import { FieldConfig, TableColumn } from "@/types/crud-interface-types";
 import { DefaultStylesTableTitle, DefaultStylesTableContent } from "@/types/style-texto-tabla";
 import { REGEX_ONLY_LETTERS_LATAM } from "@/types/regular-expresion";
 import { TypeLevel } from "@/types/type-level";
 import { EncargadoBackend, EncargadoFrontend } from "@/types/interface/interface-encargado";
 import { useCrud } from "@/hook/useCrud";
+import { CooperativaBackend } from "@/types/interface/interface-cooperativa";
+import RoleGuard from "@/components/login/RoleGuard";
+import { TD_NivelAcceso } from "@/types/interface/interface-user";
 
 export default function EncargadosPage() {
   
@@ -20,7 +23,7 @@ export default function EncargadosPage() {
   } = useCrud<EncargadoBackend>("/encargado", "encargados-table-updated");
 
   // Traemos cooperativas para asignarlas
-  const { items: rawCooperativas } = useCrud<any>("/cooperativa"); 
+  const { items: rawCooperativas } = useCrud<CooperativaBackend>("/cooperativa"); 
 
   // 2. Transformación
   const encargados: EncargadoFrontend[] = useMemo(() => {
@@ -51,7 +54,7 @@ export default function EncargadosPage() {
     });
   }, [rawEncargados]);
 
-  const opcionesCoops = rawCooperativas.map((c: any) => ({
+  const opcionesCoops = (rawCooperativas || []).map((c: CooperativaBackend) => ({
       value: c.codigoCoop,
       label: c.nombre_cooperativa
   }));
@@ -68,7 +71,7 @@ export default function EncargadosPage() {
   // 4. Formulario
   const modalFields: FieldConfig<EncargadoFrontend>[] = [
     {
-      key: "id", label: "Código Encargado", placeholder: "Ej. ENC-001",
+      key: "id",isID: true, label: "Código Encargado", placeholder: "Ej. ENC-001",
       type: "text", layout: "full", validate: (val) => !val ? "Requerido" : null
     },
     // Nombres
@@ -101,6 +104,11 @@ export default function EncargadosPage() {
   };
 
   return (
+    <RoleGuard 
+          allowedRoles={[
+            TD_NivelAcceso.Administrador, 
+          ]}
+        >
     <CrudPage<EncargadoFrontend>
       title="Gestión de Encargados"
       subtitle="Crea personal y sus credenciales de acceso"
@@ -113,7 +121,10 @@ export default function EncargadosPage() {
       verUbicacion={false}
       onCreate={handleCreate}
       onUpdate={handleUpdate}
-      onDelete={(id) => deleteItem(id)}
+      onDelete={(id) => {
+    console.log(id)
+    deleteItem(id)}}
     />
+    </RoleGuard>
   );
 }

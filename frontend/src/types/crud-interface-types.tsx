@@ -5,6 +5,7 @@ import { EstadosDefinidos } from "./types-stule-estado";
 //INTERFACE GENERAL
 export interface FieldConfig<T> {
   key: keyof T;
+  isID?: boolean;
   label: string;
   placeholder?: string;
   // Se agregaron tipos personalizados para soportar los modales que creamos

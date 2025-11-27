@@ -49,6 +49,8 @@ export function useCrud<T>(endpoint: string, socketEventName?: string) {
 
   // 4. Funciones CRUD para exponer al componente
   const createItem = async (data: any) => {
+      console.log("endpoint "+endpoint)
+      console.log("endpoint "+data)
     try {
       await CrudService.create(endpoint, data);
       toast.success("Registro creado con éxito");

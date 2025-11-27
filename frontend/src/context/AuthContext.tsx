@@ -101,7 +101,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // ⭐ LÓGICA CLAVE: ACTUALIZAR ESTADO AL RECIBIR CAMBIO
       newSocket.on('profileUpdated', (data: { message: string }) => {
-        console.log("🔥 EVENTO RECIBIDO EN FRONTEND:", data); // Mantenemos el log de debug
         toast.info("Actualización Recibida", {
           description: data.message,
           duration: 5000,

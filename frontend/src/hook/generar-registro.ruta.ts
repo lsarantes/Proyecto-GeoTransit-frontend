@@ -1,4 +1,4 @@
-import { rutas } from "@/types/interface-rutas";
+import { rutas } from "@/types/interface/interface-rutas";
 import { useState } from "react";
 
 

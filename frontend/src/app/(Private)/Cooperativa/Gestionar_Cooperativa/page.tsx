@@ -9,10 +9,14 @@ import {
 // Tipos y Estilos
 import { FieldConfig, TableColumn } from "@/types/crud-interface-types";
 import { DefaultStylesTableTitle, DefaultStylesTableContent } from "@/types/style-texto-tabla";
-import { REGEX_NUMBERS_AND_LETTERS_N_LATAM } from "@/types/regular-expresion";
+import { REGEX_NUMBERS_AND_LETTERS_N_LATAM, REGEX_NUMBERS_AND_SYMBOLS } from "@/types/regular-expresion";
 import { TypeLevel } from "@/types/type-level";
 import { CooperativaBackend, CooperativaFrontend } from "@/types/interface/interface-cooperativa";
 import { useCrud } from "@/hook/useCrud";
+import { RutaBackend } from "@/types/interface/interface-rutas";
+import { EncargadoBackend } from "@/types/interface/interface-encargado";
+import RoleGuard from "@/components/login/RoleGuard";
+import { TD_NivelAcceso } from "@/types/interface/interface-user";
 
 export default function CooperativasPage() {
   
@@ -31,9 +35,8 @@ export default function CooperativasPage() {
 
   // B. Datos Auxiliares (Para los Selects del Formulario)
   // Asumimos que existen estos endpoints. Si no, vendrán vacíos y no rompen nada.
-  const { items: rawEncargados } = useCrud<any>("/encargado"); 
-  const { items: rawRutas } = useCrud<any>("/rutas"); 
-
+  const { items: rawEncargados } = useCrud<EncargadoBackend>("/encargado"); 
+  const { items: rawRutas } = useCrud<RutaBackend>("/rutas"); 
   // ---------------------------------------------------------------------------
   // 2. TRANSFORMACIÓN DE DATOS (Backend -> Frontend)
   // ---------------------------------------------------------------------------
@@ -46,7 +49,9 @@ export default function CooperativasPage() {
       direccion: coop.direccion,
       telefono: coop.contacto.telefono.toString(),
       ubicacion: coop.ubicacion,
-      fechaCreacion: coop.fechaCreacion,
+      fechaCreacion: coop.fechaCreacion 
+          ? coop.fechaCreacion.split('T')[0] 
+          : "",
       fotoUrl: coop.fotoUrl || undefined,
       
       // Aplanamos objetos para mostrar texto en la tabla
@@ -62,14 +67,14 @@ export default function CooperativasPage() {
   }, [rawCooperativas]);
 
   // Preparamos opciones para los Selects
-  const opcionesEncargados = rawEncargados.map((e: any) => ({
+  const opcionesEncargados = (rawEncargados || []).map((e: EncargadoBackend) => ({
     value: e.id, // ID del Encargado (ej. ENC001)
     label: `${e.nombreCompleto} - ${e.personaId || 'S/ID'}`
 }));
 
-  const opcionesRutas = rawRutas.map((r: any) => ({
-    value: r.nombre_ruta, // Asumiendo que nombre_ruta es el ID
-    label: r.nombre_ruta,
+  const opcionesRutas = (rawRutas || []).map((r: RutaBackend) => ({
+    value: r.id, // Asumiendo que nombre_ruta es el ID
+    label: r.nombre,
   }));
 
   // ---------------------------------------------------------------------------
@@ -118,14 +123,6 @@ export default function CooperativasPage() {
       Icon: Phone 
     },
     { 
-      key: "rutasNombres", // Array de {value, label}
-      label: "Rutas", 
-      level: TypeLevel.tags, // Tu nuevo nivel para arrays
-      classNameTitle: DefaultStylesTableTitle.normalTitle, 
-      classNameText: "...", 
-      Icon: MapIcon 
-    },
-    { 
       key: "ubicacion", 
       label: "Ubicación", 
       level: TypeLevel.coordenada, 
@@ -133,6 +130,30 @@ export default function CooperativasPage() {
       classNameText: DefaultStylesTableContent.text, 
       Icon: MapPin 
     },
+    { 
+      key: "fechaCreacion", 
+      label: "Fecha Fundacion", 
+      level: TypeLevel.fecha, 
+      classNameTitle: DefaultStylesTableTitle.normalTitle, 
+      classNameText: DefaultStylesTableContent.text, 
+      Icon: Calendar 
+    },{ 
+      key: "direccion", 
+      label: "Dirreccion", 
+      level: TypeLevel.textNormal, 
+      classNameTitle: DefaultStylesTableTitle.normalTitle, 
+      classNameText: DefaultStylesTableContent.text, 
+      Icon: Calendar 
+    },
+    { 
+      key: "rutasNombres", // Array de {value, label}
+      label: "Rutas", 
+      level: TypeLevel.tags, // Tu nuevo nivel para arrays
+      classNameTitle: DefaultStylesTableTitle.normalTitle, 
+      classNameText: "...", 
+      Icon: MapIcon 
+    },
+    
   ];
 
   // ---------------------------------------------------------------------------
@@ -142,9 +163,11 @@ export default function CooperativasPage() {
   const modalFields: FieldConfig<CooperativaFrontend>[] = [
     {
       key: "id", // codigoCoop
+      isID: true,
       label: "Código Cooperativa",
       placeholder: "Ej. COOP-001",
       type: "text",
+      pattern: REGEX_NUMBERS_AND_LETTERS_N_LATAM.source,
       layout: "grid",
       validate: (val) => !val ? "Código requerido" : null
     },
@@ -160,8 +183,10 @@ export default function CooperativasPage() {
     {
       key: "telefono", // no_telefonico
       label: "Teléfono",
-      type: "number", // Input numérico
+      type: "text", // Input numérico
+      inputMode: "tel",
       layout: "grid",
+      pattern: REGEX_NUMBERS_AND_SYMBOLS.source,
       validate: (val) => !val ? "Requerido" : null
     },
     {
@@ -225,10 +250,10 @@ export default function CooperativasPage() {
       url_foto_perfil: formData.fotoUrl || "",
       fecha_de_creacion: formData.fechaCreacion || new Date().toISOString(),
       
-      id_encargado: formData.id_encargado,
+      id_encargado: formData.id_encargado?.value || formData.id_encargado,
       rutasIds: formData.rutasIds // Array de strings
     };
-
+    console.log(payload)
     await createItem(payload);
   };
 
@@ -250,6 +275,11 @@ export default function CooperativasPage() {
   };
 
   return (
+    <RoleGuard 
+      allowedRoles={[
+        TD_NivelAcceso.Administrador, 
+      ]}
+    >
     <CrudPage<CooperativaFrontend>
       title="Gestión de Cooperativas"
       subtitle="Administra las empresas de transporte y sus recursos"
@@ -265,5 +295,6 @@ export default function CooperativasPage() {
       onUpdate={handleUpdate}
       onDelete={(id) => deleteItem(id)}
     />
+    </RoleGuard>
   );
 }

@@ -6,6 +6,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ChevronDown, Building2, MapPin, MapPinned, Menu, X, Settings, LogOut, Bus, Users } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
+import { NivelLable, TD_NivelAcceso } from '@/types/interface/interface-user';
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -22,47 +24,32 @@ function useIsMobile() {
 
 const Navbar = () => {
   const router = useRouter();
-  const { logout ,user} = useAuth();
+  const { logout, user} = useAuth();
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({
     cooperativas: false,
-    rutas: false,
-    bahias: false,
-    buses: false,    
-    usuarios: false,
     usuario: false,
   });
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const closeTimerRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
- 
 
   const handleLogout = async () => {
-    // 1. Notificación de carga
     const loadingToast = toast.loading('Cerrando sesión...');
-    
     try {
-        // 2. Ejecuta la lógica asíncrona de logout (aviso al backend y limpieza local)
-        await logout();
-
-        // 3. Éxito: Limpia la notificación de carga y muestra el mensaje final
-        toast.dismiss(loadingToast);
-        toast.success('👋 Sesión cerrada con éxito.');
-
-        // 4. Redirige, borrando el historial de navegación
-        router.replace('/login');
-
+      await logout();
+      toast.dismiss(loadingToast);
+      toast.success('👋 Sesión cerrada con éxito.');
+      router.replace('/login');
     } catch (error) {
-        // 5. Manejo de error (si falla el aviso al servidor, pero la sesión local se borró)
-        toast.dismiss(loadingToast);
-        toast.error('Error al cerrar sesión', {
-            description: 'Hubo un problema al notificar al servidor, pero tu sesión ha sido eliminada localmente.',
-        });
-        
-        // Se fuerza la redirección aunque el aviso al servidor haya fallado.
-        router.replace('/login'); 
+      toast.dismiss(loadingToast);
+      toast.error('Error al cerrar sesión', {
+        description: 'Hubo un problema al notificar al servidor, pero tu sesión ha sido eliminada localmente.',
+      });
+      router.replace('/login');
     }
-};
+  };
 
   const openDropdown = (menu: string) => {
     if (closeTimerRef.current[menu]) {
@@ -80,24 +67,23 @@ const Navbar = () => {
   const limpiarDropdown = () => {
     setIsMobileMenuOpen(false);
     setOpenDropdowns({
-    cooperativas: false,
-    rutas: false,
-    bahias: false,
-    usuario: false,
-  });
+      cooperativas: false,
+      usuario: false,
+    });
   };
+
+  console.log(user)
+  
+
   return (
     <nav className="sticky top-0 z-40 border-b backdrop-blur-sm bg-white/95" style={{ borderColor: 'var(--border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Logo Section */}
-          <div
-            className="flex cursor-pointer items-center gap-8"
-          >
+          <div className="flex cursor-pointer items-center gap-8">
             <div className="flex items-baseline gap-1 group"
-
-              onClick={() => { router.push('/dashboard'); limpiarDropdown()}}
+              onClick={() => { router.push('/dashboard'); limpiarDropdown() }}
             >
               <span className="text-xl font-normal" style={{ color: '#000000' }}>Geo</span>
               <span className="text-xl font-semibold transition-colors group-hover:text-accent" style={{ color: 'var(--colorPrimary)' }}>Transit</span>
@@ -106,8 +92,8 @@ const Navbar = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex desktop-navbar gap-1">
 
-              {/* Cooperativas */}
-              <div
+              {/* Cooperativas (Dropdown) */}
+              {user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador && <div
                 className="relative"
                 ref={(el) => {
                   dropdownRefs.current.cooperativas = el;
@@ -118,15 +104,14 @@ const Navbar = () => {
                 <button
                   className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
                   style={{ color: 'var(--foreground)' }}
-
                 >
                   <Building2 className="w-4 h-4 group-hover:text-primary transition-colors" />
                   <span>Cooperativas</span>
                   <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdowns.cooperativas ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Dropdown */}
-                {openDropdowns.cooperativas && (
+                {/* Dropdown Content */}
+                { openDropdowns.cooperativas && (
                   <div
                     className="absolute left-0 mt-2 w-64 rounded-xl shadow-lg z-50 py-2 animate-fade-in border"
                     style={{
@@ -137,9 +122,7 @@ const Navbar = () => {
                     <Link
                       href="/Cooperativa/Gestionar_Cooperativa"
                       className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
-                      style={{
-                        color: 'var(--foreground)'
-                      }}
+                      style={{ color: 'var(--foreground)' }}
                     >
                       <div className="font-semibold">Gestionar Cooperativa</div>
                       <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
@@ -158,47 +141,47 @@ const Navbar = () => {
                     </Link>
                   </div>
                 )}
-              </div>
+              </div>}
 
-              {/* Rutas */}
-              <Link
-                href="/Ruta" 
+              {/* Rutas (Link Directo) */}
+              {(user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador || user?.detalles_rol?.nivel===TD_NivelAcceso.Gestor_de_rutas) && <Link
+                href="/Ruta"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
                 style={{ color: 'var(--foreground)' }}
               >
                 <MapPin className="w-4 h-4 group-hover:text-primary transition-colors" />
                 <span>Rutas</span>
-              </Link>
+              </Link>}
 
-              {/* Bahías */}
-               <Link
+              {/* Bahías (Link Directo) */}
+              {(user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador || user?.detalles_rol?.nivel===TD_NivelAcceso.Gestor_de_bahias) && <Link
                 href="/Bahias"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
                 style={{ color: 'var(--foreground)' }}
               >
                 <MapPinned className="w-4 h-4 group-hover:text-primary transition-colors" />
                 <span>Bahías</span>
-              </Link>
+              </Link>}
 
-              {/* Buses */}
-              <Link
-                href="/Buses" 
+              {/* Buses (Link Directo) */}
+             { user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador && <Link
+                href="/Buses"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
                 style={{ color: 'var(--foreground)' }}
               >
                 <Bus className="w-4 h-4 group-hover:text-primary transition-colors" />
                 <span>Buses</span>
-              </Link>
+              </Link>}
 
-              {/* Usuarios */}
-              <Link
-                href="/usuarios" 
+              {/* Usuarios (Link Directo) */}
+             {user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador &&  <Link
+                href="/usuarios"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
                 style={{ color: 'var(--foreground)' }}
               >
                 <Users className="w-4 h-4 group-hover:text-primary transition-colors" />
                 <span>Usuarios</span>
-              </Link>
+              </Link>}
             </div>
           </div>
 
@@ -211,16 +194,16 @@ const Navbar = () => {
               onMouseLeave={() => closeDropdown('usuario')}
             >
               <Avatar className="h-9 w-9 border-2" style={{ borderColor: 'var(--colorPrimary)' }}>
-                <AvatarImage src="https://github.com/shadcn.png" alt="Paolo Guerrero" />
+                <AvatarImage src= {user?.persona?.fotoUrl || "https://github.com/shadcn.png"}  alt={(user?.persona?.nombres + " "+ user?.persona?.apellidos)|| "Usuario"}/>
                 <AvatarFallback style={{ color: 'white', backgroundColor: 'var(--colorPrimary)' }}>PG</AvatarFallback>
               </Avatar>
 
               <div className="flex flex-col">
                 <p className="font-semibold text-sm" style={{ color: 'var(--foreground)' }}>
-                  {user?.nombreCompleto || "Renzito"} {user?.apellido || "Renzito"}
+                  {(user?.persona?.nombres + " "+ user?.persona?.apellidos)|| "Usuario"}
                 </p>
                 <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  {user?.email || "Encargado MTI"}
+                  {NivelLable(user?.detalles_rol?.nivel||"") || "Encargado MTI"}
                 </p>
               </div>
 
@@ -280,8 +263,9 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="mobile-navbar border-t pb-4 animate-fade-in" style={{ borderColor: 'var(--border)' }}>
             <div className="py-3 space-y-2">
-              {/* Mobile Cooperativas */}
-              <button
+              
+              {/* Mobile Cooperativas (Dropdown - MANTENIDO) */}
+             {user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador &&  <button
                 onClick={() => setOpenDropdowns((prev) => ({ ...prev, cooperativas: !prev.cooperativas }))}
                 className="w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center justify-between text-sm font-medium hover:bg-secondary/40"
                 style={{ color: 'var(--foreground)' }}
@@ -291,78 +275,77 @@ const Navbar = () => {
                   <span>Cooperativas</span>
                 </div>
                 <ChevronDown className={`w-4 h-4 transition-transform ${openDropdowns.cooperativas ? 'rotate-180' : ''}`} />
-              </button>
-              {openDropdowns.cooperativas && (
+              </button>}
+              {user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador &&  openDropdowns.cooperativas && (
                 <div className="pl-6 space-y-1">
                   <Link href="/Cooperativa/Gestionar_Cooperativa" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Gestionar Cooperativa
                   </Link>
-                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                  <Link href="/Cooperativa/Gestionar_Encargado" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
                     Gestionar Encargados
                   </Link>
                 </div>
               )}
 
-              {/* Mobile Rutas */}
-              <button
-                onClick={() => setOpenDropdowns((prev) => ({ ...prev, rutas: !prev.rutas }))}
-                className="w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center justify-between text-sm font-medium hover:bg-secondary/40"
+              {/* Mobile Rutas (AHORA LINK DIRECTO) */}
+              {(user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador || user?.detalles_rol?.nivel===TD_NivelAcceso.Gestor_de_rutas) && <Link
+                href="/Ruta"
+                onClick={() => limpiarDropdown()}
+                className="w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium hover:bg-secondary/40"
                 style={{ color: 'var(--foreground)' }}
               >
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>Rutas</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 transition-transform ${openDropdowns.rutas ? 'rotate-180' : ''}`} />
-              </button>
-              {openDropdowns.rutas && (
-                <div className="pl-6 space-y-1">
-                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                    Crear
-                  </Link>
-                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                    Administrar
-                  </Link>
-                </div>
-              )}
+                <MapPin className="w-4 h-4" />
+                <span>Rutas</span>
+              </Link>}
 
-              {/* Mobile Bahías */}
-              <button
-                onClick={() => setOpenDropdowns((prev) => ({ ...prev, bahias: !prev.bahias }))}
-                className="w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center justify-between text-sm font-medium hover:bg-secondary/40"
+              {/* Mobile Bahías (AHORA LINK DIRECTO) */}
+             {(user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador || user?.detalles_rol?.nivel===TD_NivelAcceso.Gestor_de_bahias) &&  <Link
+                href="/Bahias"
+                onClick={() => limpiarDropdown()}
+                className="w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium hover:bg-secondary/40"
                 style={{ color: 'var(--foreground)' }}
               >
-                <div className="flex items-center gap-2">
-                  <MapPinned className="w-4 h-4" />
-                  <span>Bahías</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 transition-transform ${openDropdowns.bahias ? 'rotate-180' : ''}`} />
-              </button>
-              {openDropdowns.bahias && (
-                <div className="pl-6 space-y-1">
-                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                    Crear
-                  </Link>
-                  <Link href="#" onClick={() => limpiarDropdown()} className="block py-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                    Administrar
-                  </Link>
-                </div>
-              )}
+                <MapPinned className="w-4 h-4" />
+                <span>Bahías</span>
+              </Link>}
+
+              {/* Mobile Buses (Link Directo) */}
+              {user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador && <Link
+                href="/Buses"
+                onClick={() => limpiarDropdown()}
+                className="w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium hover:bg-secondary/40"
+                style={{ color: 'var(--foreground)' }}
+              >
+                <Bus className="w-4 h-4" />
+                <span>Buses</span>
+              </Link>}
+
+              {/* Mobile Usuarios (Link Directo) */}
+             {user?.detalles_rol?.nivel===TD_NivelAcceso.Administrador &&  <Link
+                href="/usuarios"
+                onClick={() => limpiarDropdown()}
+                className="w-full text-left px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium hover:bg-secondary/40"
+                style={{ color: 'var(--foreground)' }}
+              >
+                <Users className="w-4 h-4" />
+                <span>Usuarios</span>
+              </Link>}
+
             </div>
 
             {/* Mobile User Section */}
             <div className="border-t pt-4 mt-4 px-4" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-3 mb-4">
                 <Avatar className="h-10 w-10 border-2" style={{ borderColor: 'var(--colorPrimary)' }}>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="Paolo Guerrero" />
+                  <AvatarImage src= {user?.persona?.fotoUrl || "https://github.com/shadcn.png"}  alt={(user?.persona?.nombres + " "+ user?.persona?.apellidos) || "Usuario"}/>
                   <AvatarFallback style={{ color: 'white', backgroundColor: 'var(--colorPrimary)' }}>PG</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-semibold text-sm" style={{ color: 'var(--foreground)' }}>
-                    Paolo Guerrero
+                    {(user?.persona?.nombres + " "+ user?.persona?.apellidos) || "Usuario"}
                   </p>
                   <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    Encargado MTI
+                    {NivelLable(user?.detalles_rol?.nivel||"") || "Encargado MTI"}
                   </p>
                 </div>
               </div>

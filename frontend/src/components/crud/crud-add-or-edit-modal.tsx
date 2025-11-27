@@ -12,6 +12,7 @@ export function CrudModal({ onSubmit, onCancel, initialData, isEditing, fields, 
     const [formData, setFormData] = useState(initialData || {});
     const [errors, setErrors] = useState<any>({});
     const [showLocationPicker, setShowLocationPicker] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
 
     const validateForm = () => {
         const newErrors: any = {};
@@ -105,11 +106,12 @@ export function CrudModal({ onSubmit, onCancel, initialData, isEditing, fields, 
                     {field.options?.length > 0 ? (
                         <div className="grid grid-cols-1 gap-1">
                             {field.options.map((opt: any) => {
-                                const isSelected = selectedIds.has(opt);
+                                const value = opt.value || opt;
+                                const isSelected = selectedIds.has(value);
                                 return (
                                     <div
                                         key={opt.value}
-                                        onClick={() => toggleOption(opt)}
+                                        onClick={() => toggleOption(value)}
                                         className={`
                                           flex items-center gap-3 p-2.5 rounded-md cursor-pointer text-sm transition-all duration-200 border
                                           ${isSelected
@@ -136,6 +138,46 @@ export function CrudModal({ onSubmit, onCancel, initialData, isEditing, fields, 
 
     function renderPhotoField(field: any) {
         const value = formData[field.key];
+
+        // DATOS DE TU CLOUDINARY
+        const CLOUD_NAME = "dc99fxwy2";
+        const UPLOAD_PRESET = "mi_app_preset"; // El que creaste en 'unsigned'
+
+        const handleUpload = async (e: any) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            // 1. Mostrar preview inmediato (opcional, para UX rápida)
+            const fakeUrl = URL.createObjectURL(file);
+            // handleChange(field.key, fakeUrl); // ⚠️ OJO: Si usas esto, tu BD guardará blob:local... mejor espera la real.
+
+            // 2. Iniciar subida
+            setUploading(true);
+
+            const data = new FormData();
+            data.append("file", file);
+            data.append("upload_preset", UPLOAD_PRESET);
+
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: "POST",
+                    body: data,
+                });
+
+                const fileData = await res.json();
+
+                if (fileData.secure_url) {
+                    // 3. ¡ÉXITO! Guardamos la URL real de internet en tu formulario
+                    handleChange(field.key, fileData.secure_url);
+                    console.log("Imagen subida:", fileData.secure_url);
+                }
+            } catch (error) {
+                console.error("Error subiendo imagen:", error);
+                alert("Error al subir la imagen");
+            } finally {
+                setUploading(false);
+            }
+        };
         return (
             <div key={String(field.key)} className="space-y-2.5">
                 <Label className="text-slate-700 font-semibold text-sm">{field.label}</Label>
@@ -147,15 +189,16 @@ export function CrudModal({ onSubmit, onCancel, initialData, isEditing, fields, 
                         <input
                             type="file"
                             accept="image/*"
+                            disabled={uploading}
                             className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                            onChange={(e: any) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    const fakeUrl = URL.createObjectURL(file);
-                                    handleChange(field.key, fakeUrl);
-                                }
-                            }}
+                            onChange={handleUpload}
                         />
+                        {uploading && (
+                        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span className="text-xs font-bold text-blue-600 mt-2">Subiendo a la nube...</span>
+                        </div>
+                    )}
 
                         {value ? (
                             <div className="w-full h-full relative group-hover:opacity-90 transition-opacity">
@@ -222,6 +265,8 @@ export function CrudModal({ onSubmit, onCancel, initialData, isEditing, fields, 
             <div key={String(field.key)} className="space-y-2.5">
                 <Label className="text-slate-700 font-semibold text-sm">{field.label}</Label>
                 <Input
+                    {...((field.isID && isEditing ) ? { disabled: true} : {})}
+                    
                     type={field.type || "text"}
                     {...(field.type === "number" ? { min: field.min } : {})}
                     value={formData[field.key] || ""}

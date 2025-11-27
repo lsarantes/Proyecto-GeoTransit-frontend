@@ -1,89 +1,161 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Save, UserCog, Undo2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ProfileForm } from "@/components/configPerfil/profile-form"
-import { ProfileAvatar } from "@/components/configPerfil/profile-avatar"
+import { useState, useEffect } from "react";
+import { Save, UserCog, Undo2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+import { apiFetch } from "@/service/api";
+import { User } from "@/types/interface/interface-auth";
 
-interface ProfileData {
-  primerNombre: string
-  segundoNombre: string
-  primerApellido: string
-  segundoApellido: string
-  codigoPais: string
-  telefono: string
-  fechaCreacion: string
-  fechaActualizacion: string
-  rol: string
-  fotoUrl?: string 
+import { ProfileAvatar } from "@/components/configPerfil/profile-avatar";
+import { ProfileForm } from "@/components/configPerfil/profile-form";
+
+// Usamos la misma interfaz que definiste en ProfileForm
+interface ProfileDataState {
+    // Editables
+    primer_nombre: string;
+    segundo_nombre: string | null | undefined;
+    primer_apellido: string;
+    segundo_apellido: string | null | undefined;
+    url_Foto: string | null | undefined;
+    telefono?: string;
+    
+    // Solo lectura
+    rol: string; 
+    fecha: string | Date; // lastLogin
+    fechaCreacion?: string; // Nuevo campo para la fecha de creación si existe
+    email: string;
 }
 
+
 export default function ConfiguracionPerfilPage() {
+  const { user } = useAuth();
   
-  const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
+
+  const [profileDataState, setProfileDataState] = useState<ProfileDataState | null>(null);
+  const [backupData, setBackupData] = useState<ProfileDataState | null>(null);
+
+  // --- 1. CARGA INICIAL DE DATOS DEL CONTEXTO ---
+  useEffect(() => {
+    if (user && user.persona) {
+      const persona = user.persona;
+      const rolDisplay = user.detalles_rol?.nivel || user.role;
+      const telefonoDisplay = persona.telefonos && persona.telefonos.length > 0
+          ? persona.telefonos[0].no_telefonico
+          : '';
+      
+      const initialData: ProfileDataState = {
+        // Datos editables
+        primer_nombre: persona.primer_nombre || "",
+        segundo_nombre: persona.segundo_nombre || null,
+        primer_apellido: persona.primer_apellido || "",
+        segundo_apellido: persona.segundo_apellido || null,
+        url_Foto: persona.fotoUrl || null,
+        telefono: telefonoDisplay,
+
+        // Datos de UI (solo lectura)
+        rol: rolDisplay,
+        email: user.email,
+        fecha: user.lastLogin,
+        fechaCreacion: user.lastLogin?.toString() || '2023-01-01', // Asume que tienes un `createdAt` en `User`
+      };
+
+      setProfileDataState(initialData);
+      setBackupData(initialData);
+      setIsProfileLoading(false);
+    } else if (!user) {
+        if (isProfileLoading) setIsProfileLoading(false); 
+    }
+  }, [user]);
+
+  // Manejador de cambios local
+  const handleChange = (newData: ProfileDataState) => {
+    setProfileDataState(newData);
+  };
   
-  const [profileData, setProfileData] = useState<ProfileData>({
-    primerNombre: "Juan",
-    segundoNombre: "Carlos",
-    primerApellido: "Pérez",
-    segundoApellido: "Rodríguez",
-    codigoPais: "+505",
-    telefono: "8888-8888",
-    fechaCreacion: "2023-01-15T10:00:00",
-    fechaActualizacion: "2023-11-20T15:30:00",
-    rol: "Administrador",
-    fotoUrl: "https://github.com/shadcn.png"
-  })
+  // Manejador de cambio de foto (actualiza solo la URL)
+  const handlePhotoChange = (newUrl: string) => {
+    setProfileDataState(prev => ({ ...prev!, url_Foto: newUrl }));
+  };
 
-  const [backupData, setBackupData] = useState<ProfileData>(profileData)
-
-  const handleStartEdit = () => {
-    setBackupData({ ...profileData }) 
-    setIsEditing(true)
+  // Prevenir renderizado si la información de sesión no está lista
+  if (isProfileLoading || !profileDataState) {
+    return (
+      <div className="h-[calc(100vh-4rem)] flex flex-col items-center justify-center gap-4 text-muted-foreground">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+        <p className="ml-3 text-lg">Cargando perfil...</p>
+      </div>
+    );
   }
+  
+  const handleStartEdit = () => {
+    setBackupData({ ...profileDataState! }); 
+    setIsEditing(true);
+  };
 
   const handleCancel = () => {
-    setProfileData(backupData) 
-    setIsEditing(false)
-  }
+    setProfileDataState(backupData); 
+    setIsEditing(false);
+  };
+
+  // --- 3. CONEXIÓN AL BACKEND (GUARDAR) ---
 
   const handleSave = async () => {
-    setIsLoading(true)
+    if (!profileDataState) return;
+    setIsSaving(true);
+
+    const dto = { // Payload para el backend
+        primer_nombre: profileDataState.primer_nombre,
+        segundo_nombre: profileDataState.segundo_nombre,
+        primer_apellido: profileDataState.primer_apellido,
+        segundo_apellido: profileDataState.segundo_apellido,
+        url_Foto: profileDataState.url_Foto,
+        //telefono: profileDataState.telefono, // Asegúrate de que tu backend lo maneje
+    };
     
-    setTimeout(() => {
-      console.log("GUARDANDO PERFIL:", profileData)
-      setProfileData(prev => ({
-        ...prev,
-        fechaActualizacion: new Date().toISOString()
-      }))
-      
-      setIsLoading(false)
-      setIsEditing(false)
-    }, 1000)
+    try {
+        await apiFetch<User>('/auth/profile', {
+            method: 'PATCH',
+            body: JSON.stringify(dto),
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        toast.success("Perfil actualizado con éxito.");
+        
+        //await refreshUser(); 
+
+        setIsEditing(false);
+
+    } catch (error: any) {
+        console.error("Error al guardar perfil:", error);
+        toast.error("Error al actualizar. Intente de nuevo.");
+        setProfileDataState(backupData); // Restaurar datos
+    } finally {
+        setIsSaving(false);
+    }
   }
 
-  const handleChange = (newData: ProfileData) => {
-    setProfileData(newData)
-  }
+  // --- RENDERIZADO ---
+  
+  const displayProfile = profileDataState; 
+  const displayNombres = `${displayProfile.primer_nombre} ${displayProfile.segundo_nombre || ''}`.trim();
+  const displayApellidos = `${displayProfile.primer_apellido} ${displayProfile.segundo_apellido || ''}`.trim();
 
-  const handlePhotoChange = (newUrl: string) => {
-    setProfileData(prev => ({ ...prev, fotoUrl: newUrl }))
-  }
 
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header de la Página */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Header de la Página y Botones */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-4 border-b border-slate-200">
           <div>
-            <h1 className="text-3xl font-bold text-primary">Configuración de Perfil</h1>
-            <p className="text-muted-foreground mt-1">
-              Administra tu información personal y preferencias de cuenta.
+            <h1 className="text-3xl font-extrabold text-slate-900">Configuración de Perfil</h1>
+            <p className="text-slate-500 mt-1">
+              Administra tu información personal y datos de contacto.
             </p>
           </div>
           
@@ -91,17 +163,17 @@ export default function ConfiguracionPerfilPage() {
           <div className="flex gap-3">
             {isEditing ? (
               <>
-                <Button variant="outline" onClick={handleCancel} disabled={isLoading} className="text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 cursor-pointer">
+                <Button variant="outline" onClick={handleCancel} disabled={isSaving} className="text-slate-600 hover:text-slate-800 border-slate-300">
                   <Undo2 className="mr-2 h-4 w-4" />
                   Cancelar
                 </Button>
-                <Button onClick={handleSave} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
-                  <Save className="mr-2 h-4 w-4" />
-                  {isLoading ? "Guardando..." : "Guardar Cambios"}
+                <Button onClick={handleSave} disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                  {isSaving ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+                  {isSaving ? "Guardando..." : "Guardar Cambios"}
                 </Button>
               </>
             ) : (
-              <Button onClick={handleStartEdit} className="cursor-pointerbg-gradient-to-r from-[var(--colorPrimary)] to-[var(--colorAcentuar)] hover:from-[#1a5a9f] hover:to-[#4a449a] text-white">
+              <Button onClick={handleStartEdit} className="bg-slate-800 hover:bg-slate-700 text-white shadow-md">
                 <UserCog className="mr-2 h-4 w-4" />
                 Editar Perfil
               </Button>
@@ -109,56 +181,29 @@ export default function ConfiguracionPerfilPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
-          {/* Columna Izquierda: Avatar y Resumen */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <ProfileAvatar 
-                  fotoUrl={profileData.fotoUrl}
-                  nombre={`${profileData.primerNombre} ${profileData.primerApellido}`}
-                  isEditing={isEditing}
-                  onPhotoChange={handlePhotoChange}
-                />
-                
-                <Separator className="my-6" />
-                
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Rol del Sistema</h4>
-                    <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary text-primary-foreground hover:bg-primary/80">
-                      {profileData.rol}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Miembro desde</h4>
-                    <p className="text-sm font-medium">
-                      {new Date(profileData.fechaCreacion).getFullYear()}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Columna Izquierda: Avatar (Lg: 1/4) */}
+          <div className="lg:col-span-1">
+            <ProfileAvatar 
+                fotoUrl={displayProfile.url_Foto}
+                nombres={displayNombres}
+                apellidos={displayApellidos}
+                email={displayProfile.email}
+                rol={displayProfile.rol}
+                lastLogin={displayProfile.fecha}
+                isEditing={isEditing}
+                onPhotoChange={handlePhotoChange}
+            />
           </div>
 
-          {/* Columna Derecha: Formulario Detallado */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Información Personal</CardTitle>
-                <CardDescription>
-                  Actualiza tus datos de identificación y contacto.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ProfileForm 
-                  data={profileData}
-                  isEditing={isEditing}
-                  onChange={handleChange}
-                />
-              </CardContent>
-            </Card>
+          {/* Columna Derecha: Formulario Detallado (Lg: 3/4) */}
+          <div className="lg:col-span-3">
+            <ProfileForm 
+                data={displayProfile}
+                isEditing={isEditing}
+                onChange={handleChange}
+            />
           </div>
 
         </div>

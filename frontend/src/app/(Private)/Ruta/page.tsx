@@ -1,131 +1,143 @@
 "use client";
 
-import { useState } from "react";
-import { useCooperativas } from "@/hook/generar-registro.tabla";
-import { Bone, Building2, BusFront, Calendar, Hash, House, HouseHeart, IdCardIcon, MapPin, Phone, User, Users, Zap } from 'lucide-react';
+import { useMemo } from "react";
 import { CrudPage } from "@/components/crud/crud-page";
-import { DefaultStylesTableTitle, DefaultStylesTableContent } from "@/types/style-texto-tabla";
+import { Map, MapPin, Calendar, Bus, Warehouse } from 'lucide-react';
 import { FieldConfig, TableColumn } from "@/types/crud-interface-types";
-import { handleValidatedChange, REGEX_NUMBERS_AND_LETTERS_N_LATAM, REGEX_NUMBERS_AND_SYMBOLS, REGEX_ONLY_LETTERS_LATAM, REGEX_ONLY_NUMBERS } from "@/types/regular-expresion";
+import { DefaultStylesTableTitle, DefaultStylesTableContent } from "@/types/style-texto-tabla";
 import { TypeLevel } from "@/types/type-level";
-import { rutas } from "@/types/interface-rutas";
-import { useRuta } from "@/hook/generar-registro.ruta";
+import { RutaBackend, RutaFrontend } from "@/types/interface/interface-rutas";
+import { useCrud } from "@/hook/useCrud";
+import { CooperativaBackend } from "@/types/interface/interface-cooperativa";
+import { BahiaBackend } from "@/types/interface/interface-bahias";
+import RoleGuard from "@/components/login/RoleGuard";
+import { TD_NivelAcceso } from "@/types/interface/interface-user";
 
+export default function RutasPage() {
+  
+  // 1. HOOKS (Datos principales y auxiliares)
+  const { items: rawRutas, loading, createItem, updateItem, deleteItem } = 
+    useCrud<RutaBackend>("/rutas", "rutas-table-updated");
 
+  const { items: rawCoops } = useCrud<CooperativaBackend>("/cooperativa");
+  const { items: rawBahias } = useCrud<BahiaBackend>("/bahias"); // Asegúrate que exista este endpoint en backend cuando hagamos Bahias
 
+  // 2. TRANSFORMACIÓN
+  const rutas: RutaFrontend[] = useMemo(() => {
+    return rawRutas.map((r) => ({
+      id: r.id,
+      nombre: r.nombre,
+      origen: r.origen,
+      destino: r.destino,
+      fechaCreacion: r.fechaCreacion 
+          ? r.fechaCreacion.split('T')[0] // Convierte "2025-11-27T04..." en "2025-11-27"
+          : "",
+      
+      // Texto plano para tabla
+      cooperativasTexto: r.cooperativas.map(c => c.nombre).join(', '),
+      bahiasTexto: r.bahias.map(b => b.nombre).join(', '),
 
+      // Datos para formulario
+      cooperativasIds: r.cooperativas.map(c => c.id),
+      bahiasIds: r.bahias.map(b => b.id),
 
-// 👇 Hook de ejemplo (tú ya lo tienes)
+      // Tags para tabla visual
+      cooperativasTags: r.cooperativas.map(c => ({ value: c.id, label: c.nombre })),
+      bahiasTags: r.bahias.map(b => ({ value: b.id, label: b.nombre })),
+    }));
+  }, [rawRutas]);
 
-export default function RutaPage() {
-  // Load items
-  const { rutas, setRutas, cooperativaAsociadas, rutasAsociadas } = useRuta();
+ 
 
-  // ---------- TABLE COLUMNS ----------
-  const columns: TableColumn<rutas>[] = [
-    { key: "id", label: "Nombre de Ruta", level: TypeLevel.id, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.id, Icon: IdCardIcon },
-    { key: "origen", label: "Origen de la ruta", level: TypeLevel.coordenada, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.titulo, Icon: House },
-    { key: "destino", label: "Destino de la ruta", level: TypeLevel.coordenada, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.subtitulo, Icon: HouseHeart },
-    { key: "fecha_creacion", label: "Fecha", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.centerTitle, classNameText: DefaultStylesTableContent.fecha, Icon: Calendar },
-    { key: "cooperativaAsociadas", label: "Cooperativa", level: TypeLevel.textRelevante, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Users },
-    { key: "rutasAsociadas", label: "Ruta", level: TypeLevel.textRelevante, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: BusFront },
-  ];
+  // Opciones para Selects
+  const opcionesCoops = (rawCoops || []).map((c: CooperativaBackend) => ({ value: c.codigoCoop, label: c.nombre_cooperativa }));
+  const opcionesBahias = (rawBahias || []).map((b: BahiaBackend) => ({ value: b.id, label: b.nombre }));
 
-  // ---------- MODAL FIELDS ----------
-  const modalFields: FieldConfig<rutas>[] = [
-    {
-      key: "id",
-      label: "Nombre de la Ruta",
-      placeholder: "Nombre de la Ruta",
-      type: "text",
-      layout: "full",
-      pattern: REGEX_NUMBERS_AND_LETTERS_N_LATAM.source,
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "El nombre es requerido";
-        }
-        return null;
-      }
-    },
-    {
-      key: "origen",
-      label: "Origen de la ubicacion",
-      type: "location",
-      layout: "full",
-      validate: (val: any) => (!val || val.lat === 0) ? "Debe seleccionar una ubicación de origen en el mapa" : null
-    },
-    {
-      key: "destino",
-      label: "Destino de la ubicacion",
-      type: "location",
-      layout: "full",
-      validate: (val: any) => (!val || val.lat === 0) ? "Debe seleccionar una ubicación de destino en el mapa" : null
-    },
-  {
-      key: "fecha_creacion",
-      label: "Fecha de Registro",
-      type: "date",
-      layout: "grid"
-    },
-    {
-      key: "rutasAsociadas", 
-      label: "Asociar Rutas ",
-      type: "multiselect",
-      layout: "full",
-      options: rutasAsociadas
-    },
-    {
-      key: "cooperativaAsociadas", 
-      label: "Asociar Rutas",
-      type: "multiselect",
-      layout: "full",
-      options: cooperativaAsociadas
-    }
-
-  ];
-
-  // ---------- SEARCH KEYS ----------
-  const searchKeys: (keyof rutas)[] = ["id"];
-
-  // ---------- HANDLERS ----------
-  const onCreate = (data: Omit<rutas, "id">) => {
-    console.log("CREAR:", data);
+  // 3. COLUMNAS
+  const columns: TableColumn<RutaFrontend>[] = [
+    { key: "id", label: "Ruta", level: TypeLevel.id, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.id, Icon: Bus },
+    { key: "nombre", label: "Descripción", level: TypeLevel.titulo, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.titulo, Icon: Map },
     
-    const newItem: rutas = {
-      id: (rutas.length +1 ).toString(),
-      ...data,
+    // Tags para Cooperativas
+    { key: "cooperativasTags", label: "Cooperativas", level: TypeLevel.tags, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: "", Icon: Bus },
+    { key: "fechaCreacion", label: "Registro", level: TypeLevel.fecha, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Calendar },
+    
+    // Tags para Bahías (Opcional, o texto si son muchas)
+    { key: "bahiasTags", label: "Paradas (Bahías)", level: TypeLevel.tags, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: "", Icon: Warehouse },
+    
+    { key: "origen", label: "Origen", level: TypeLevel.coordenada, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: MapPin },
+    { key: "destino", label: "Destino", level: TypeLevel.coordenada, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: MapPin },
+  ];
+
+  // 4. FORMULARIO
+  const modalFields: FieldConfig<RutaFrontend>[] = [
+    { key: "id",isID: true, label: "N° Ruta", placeholder: "Ej. 104", type: "text", layout: "grid", validate: (v) => !v ? "Requerido" : null },
+    { key: "nombre", label: "Nombre Descriptivo", placeholder: "Ej. UCA - Subasta", type: "text", layout: "grid", validate: (v) => !v ? "Requerido" : null },
+    
+    // Ubicaciones
+    { key: "origen", label: "Punto de Origen (Inicio)", type: "location", layout: "full", validate: (v: any) => (!v || v.lat === 0) ? "Marque origen" : null },
+    { key: "destino", label: "Punto de Destino (Final)", type: "location", layout: "full", validate: (v: any) => (!v || v.lat === 0) ? "Marque destino" : null },
+    
+    // Relaciones
+    { key: "cooperativasIds", label: "Cooperativas Asignadas", type: "multiselect", layout: "full", options: opcionesCoops },
+    { key: "bahiasIds", label: "Bahías (Paradas) de la Ruta", type: "multiselect", layout: "full", options: opcionesBahias },
+    
+    { key: "fechaCreacion", label: "Fecha Registro", type: "date", layout: "grid" }
+  ];
+
+  const searchKeys: (keyof RutaFrontend)[] = ["id", "nombre", "cooperativasTexto"];
+
+  // 5. HANDLERS
+  const handleCreate = async (formData: any) => {
+    const payload = {
+      id: formData.id,
+      nombre_ruta: formData.nombre,
+      origen_latitud: parseFloat(formData.origen?.lat || 0),
+      origen_longitud: parseFloat(formData.origen?.lng || 0),
+      destino_latitud: parseFloat(formData.destino?.lat || 0),
+      destino_longitud: parseFloat(formData.destino?.lng || 0),
+      fecha_creacion: formData.fechaCreacion || new Date().toISOString(),
+      cooperativasIds: formData.cooperativasIds,
+      bahiasIds: formData.bahiasIds
     };
-    setRutas((prev) => [...prev, newItem]);
+    await createItem(payload);
   };
 
-  const onUpdate = (data: rutas) => {
-    console.log("UPDATE:", data);
-    setRutas((prev) =>
-      prev.map((item) => (item.id === data.id ? data : item))
-    );
-    
-  };
-
-  const onDelete = (id: string) => {
-    console.log("DELETE:", id);
-
-    setRutas((prev) => prev.filter((item) => item.id !== id));
+  const handleUpdate = async (formData: any) => {
+    const payload = {
+      nombre_ruta: formData.nombre,
+      origen_latitud: parseFloat(formData.origen?.lat),
+      origen_longitud: parseFloat(formData.origen?.lng),
+      destino_latitud: parseFloat(formData.destino?.lat),
+      destino_longitud: parseFloat(formData.destino?.lng),
+      fecha_creacion: formData.fechaCreacion,
+      cooperativasIds: formData.cooperativasIds,
+      bahiasIds: formData.bahiasIds
+    };
+    await updateItem(formData.id, payload);
   };
 
   return (
-    <CrudPage<rutas>
+     <RoleGuard 
+          allowedRoles={[
+            TD_NivelAcceso.Administrador, 
+            TD_NivelAcceso.Gestor_de_rutas, 
+          ]}
+        >
+    <CrudPage<RutaFrontend>
       title="Gestión de Rutas"
-      subtitle="Administra todas tus rutas en un solo lugar"
-      Icon={Building2}
+      subtitle="Administra trayectos, orígenes, destinos y asignaciones"
+      Icon={Map}
       identity="Ruta"
       items={rutas}
       columns={columns}
       searchKeys={searchKeys}
       modalFields={modalFields}
-      onCreate={onCreate}
-      onUpdate={onUpdate}
-      onDelete={onDelete}
+      verUbicacion={true}
+      onCreate={handleCreate}
+      onUpdate={handleUpdate}
+      onDelete={(id) => deleteItem(id)}
     />
+    </RoleGuard>
   );
 }

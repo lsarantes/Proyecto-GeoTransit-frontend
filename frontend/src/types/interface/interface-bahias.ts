@@ -1,17 +1,29 @@
-
-export interface Bahias {
-    id: string;
-    posicion_ubicacion: { lat: number; lng: number };
-    url_foto: string;
-    fecha_creada: string;
-    rutasAsociadas?: {value: string, label: string}[];
-    empleado_mti?: empleado;
-    pasajeros: string;
+export interface BahiaBackend {
+  id: string;
+  nombre: string;
+  ubicacion: { lat: number; lng: number };
+  fotoUrl: string | null;
+  fechaCreacion: string;
+  
+  creadoPor: { id: string; nombre: string } | null;
+  rutas: { id: string; nombre: string }[];
 }
 
+export interface BahiaFrontend {
+  id: string;
+  nombre: string;
+  ubicacion: { lat: number; lng: number };
+  fechaCreacion: string;
+  fotoUrl?: string;
 
+  // Visualización
+  creadoPorNombre: string;
+  rutasTexto: string;
 
-export interface empleado{
-    value: string;
-    label: string;
+  // Formulario
+  empleado_mti_id: string; // Select
+  rutasIds: string[];      // Multiselect
+  
+  // Tags
+  rutasTags: { value: string; label: string }[];
 }

@@ -25,6 +25,8 @@ export const apiFetch = async <T>(endpoint: string, options: RequestInit = {}): 
 
   // Aseguramos que la petición siempre inicie con /api para el proxy de Next.js
   const finalEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+  console.log(finalEndpoint)
+  console.log(config)
 
   try {
     const response = await fetch(finalEndpoint, config);
