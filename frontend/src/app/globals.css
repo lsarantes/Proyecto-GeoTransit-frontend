@@ -192,3 +192,7 @@ input:-webkit-autofill::first-line {
     display: none !important;
   }
 }
+
+button{
+  cursor: pointer;
+}
