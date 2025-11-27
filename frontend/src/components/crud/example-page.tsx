@@ -1,4 +1,4 @@
-"use client";
+/* "use client";
 
 import { useState } from "react";
 import {  useCooperativas } from "@/hook/generar-registro.tabla";
@@ -139,3 +139,4 @@ export default function CooperativasPage() {
     />
   );
 }
+ */
