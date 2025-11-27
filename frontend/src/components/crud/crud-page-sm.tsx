@@ -68,6 +68,7 @@ function sortMixedId(a: string, b: string) {
 export function CrudPage<T extends { id: string }>({
     title,
     subtitle,
+    verUbicacion,
     Icon = Loader,
     identity,
     items,
@@ -244,7 +245,7 @@ export function CrudPage<T extends { id: string }>({
                     onEdit={openFormForEdit}
                     onDelete={(id: string) => setDeletingItem(items.find(c => c.id === id) || null)}
                     onView={setViewingItem}
-                    // onViewLocation eliminado
+                    verUbicaciones={verUbicacion}
                     handleItemsPerPageChange={handleItemsPerPageChange}
                     searchTerm={searchTerm}
                     currentPage={currentPage}
