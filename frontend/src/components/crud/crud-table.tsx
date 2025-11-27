@@ -35,10 +35,11 @@ import { EstadosDefinidos } from "@/types/types-stule-estado";
 
 
 
-export function CrudTable<T extends { id: string }>({
+export function CrudTable<T>({
     originalItems,
     filteredItems,
     identity,
+    verUbicaciones,
     Icon = Loader,
     columns,
     onEdit,
@@ -59,6 +60,7 @@ export function CrudTable<T extends { id: string }>({
     const firstTitle = columns.find(c => c.level === TypeLevel.titulo);
     const firstSubtitle = columns.find(c => c.level === TypeLevel.subtitulo);
     const fotoColumn = columns.find(col => col.level === TypeLevel.foto);
+    const idKey = columns.find(c => c.level === TypeLevel.id)?.key;
     // Helper para obtener estilos según el nivel de estado
     const getStatusConfig = (level: EstadosDefinidos = "neutral", customClass: string = "") => {
         const base = "border font-medium text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm transition-colors";
@@ -118,15 +120,15 @@ export function CrudTable<T extends { id: string }>({
                 ) : (
                     items.map((item) => (
                         <div
-                            key={item.id}
-                            className={`group rounded-xl border transition-all duration-300 overflow-hidden ${expandedId === item.id
-                                    ? "border-[var(--colorPrimary)] shadow-md bg-white ring-1 ring-[var(--colorPrimary)]/20"
-                                    : "border-[var(--colorSecondary)] bg-white shadow-sm hover:shadow-md"
+                            key={item[idKey!] as string}
+                            className={`group rounded-xl border transition-all duration-300 overflow-hidden ${expandedId === item[idKey!] as string
+                                ? "border-[var(--colorPrimary)] shadow-md bg-white ring-1 ring-[var(--colorPrimary)]/20"
+                                : "border-[var(--colorSecondary)] bg-white shadow-sm hover:shadow-md"
                                 }`}
                         >
                             {/* --- CARD HEADER --- */}
                             <button
-                                onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                                onClick={() => setExpandedId(expandedId === item[idKey!] as string ? null : item[idKey!] as string)}
                                 className="w-full p-3.5 flex items-center gap-3 text-left relative bg-white z-10"
                             >
                                 {fotoColumn && (
@@ -145,7 +147,7 @@ export function CrudTable<T extends { id: string }>({
                                 <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] font-bold text-[var(--colorPrimary)] bg-[var(--colorPrimary)]/10 px-1.5 py-0.5 rounded-md border border-[var(--colorPrimary)]/20">
-                                            #{item.id.toString().padStart(2, '0')}
+                                            #{(item[idKey!] as string).padStart(2, '0')}
                                         </span>
                                         <h3 className={`${firstTitle?.classNameTitle || "font-bold text-slate-800"} truncate text-sm`}>
                                             {firstTitle ? (item as any)[firstTitle.key] : "—"}
@@ -157,13 +159,13 @@ export function CrudTable<T extends { id: string }>({
                                     </p>
                                 </div>
 
-                                <div className={`shrink-0 text-[var(--textColor)]/40 transition-transform duration-300 ${expandedId === item.id ? "rotate-180 text-[var(--colorPrimary)]" : ""}`}>
+                                <div className={`shrink-0 text-[var(--textColor)]/40 transition-transform duration-300 ${expandedId === item[idKey!] as string ? "rotate-180 text-[var(--colorPrimary)]" : ""}`}>
                                     <ChevronDown className="w-5 h-5" />
                                 </div>
                             </button>
 
                             {/* --- CARD BODY --- */}
-                            <div className={`grid transition-all duration-300 ease-in-out ${expandedId === item.id ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                            <div className={`grid transition-all duration-300 ease-in-out ${expandedId === item[idKey!] as string ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
                                 <div className="overflow-hidden bg-[var(--bgGeneral)]/30">
                                     <div className="p-3.5 border-t border-[var(--colorSecondary)]/50">
 
@@ -302,9 +304,12 @@ export function CrudTable<T extends { id: string }>({
                                             {/* <Button variant="outline" size="sm" onClick={() => onView?.(item)} className="flex-1 bg-white border-[var(--colorSecondary)] text-[var(--textColor)]/80 hover:text-[var(--colorPrimary)] hover:bg-[var(--colorPrimary)]/5 h-9">
                                                 <Eye className="w-4 h-4 mr-2" /> Ver
                                             </Button> */}
-                                            <Button variant="outline" size="sm" onClick={() => onViewLocation?.(item)} className="flex-1 bg-white border-[var(--colorSecondary)] text-[var(--textColor)]/80 hover:text-[var(--colorPrimary)] hover:bg-[var(--colorPrimary)]/5 h-9">
-                                                <MapPin className="w-4 h-4 mr-2" /> Mapa
-                                            </Button>
+                                            {(verUbicaciones) ?
+                                                (<Button variant="outline" size="sm" onClick={() => onViewLocation?.(item)} className="flex-1 bg-white border-[var(--colorSecondary)] text-[var(--textColor)]/80 hover:text-[var(--colorPrimary)] hover:bg-[var(--colorPrimary)]/5 h-9">
+                                                    <MapPin className="w-4 h-4 mr-2" /> Mapa
+                                                </Button>) : null
+                                            }
+
                                             <Button variant="outline" size="sm" onClick={() => onEdit?.(item)} className="flex-1 bg-white border-[var(--colorSecondary)] text-[var(--textColor)]/80 hover:text-indigo-600 hover:bg-indigo-50 h-9">
                                                 <Pencil className="w-4 h-4 mr-2 opacity-70" /> Editar
                                             </Button>
@@ -319,7 +324,7 @@ export function CrudTable<T extends { id: string }>({
                                                     <DropdownMenuItem onClick={() => onEdit?.(item)} className="cursor-pointer py-2">
                                                         <Pencil className="w-4 h-4 mr-2 opacity-70" /> Editar
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => onDelete?.(item.id)} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer py-2">
+                                                    <DropdownMenuItem onClick={() => onDelete?.(item[idKey!] as string)} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer py-2">
                                                         <Trash2 className="w-4 h-4 mr-2 opacity-70" /> Eliminar
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
@@ -429,7 +434,7 @@ export function CrudTable<T extends { id: string }>({
                             ) : (
                                 items.map((item: any) => (
                                     <TableRow
-                                        key={item.id}
+                                        key={item[idKey!] as string}
                                         className="border-b border-[var(--colorSecondary)] hover:bg-[var(--bgGeneral)] transition-all duration-300 hover:shadow-sm"
                                     >
 
@@ -640,7 +645,7 @@ export function CrudTable<T extends { id: string }>({
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                 </Button> */}
-                                                <Button
+                                                {(verUbicaciones)?(<Button
                                                     variant="ghost"
                                                     size="sm"
                                                     title="Ver Mapa"
@@ -648,7 +653,8 @@ export function CrudTable<T extends { id: string }>({
                                                     className="h-8 w-8 p-0 hover:bg-[var(--colorPrimary)]/15 hover:text-[var(--colorPrimary)] text-[var(--textColor)]/70 transition-colors"
                                                 >
                                                     <MapPin className="h-4 w-4" />
-                                                </Button>
+                                                </Button>):null}
+                                                
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button
@@ -669,7 +675,7 @@ export function CrudTable<T extends { id: string }>({
                                                         </DropdownMenuItem>
 
                                                         <DropdownMenuItem
-                                                            onClick={() => onDelete?.(item.id)}
+                                                            onClick={() => onDelete?.(item[idKey!] as string)}
                                                             className="cursor-pointer text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors text-sm"
                                                         >
                                                             <Trash2 className="mr-2 h-4 w-4" />

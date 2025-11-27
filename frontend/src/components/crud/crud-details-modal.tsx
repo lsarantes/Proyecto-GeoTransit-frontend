@@ -4,7 +4,7 @@ import { ItemDetailsModalProps } from '@/types/crud-interface-types';
 import { TypeLevel } from '@/types/type-level';
 import { FileText, Info } from 'lucide-react'; // Added icons for section headers
 
-export function ItemDetailsModal<T extends { id: string }>({ item, columns }: ItemDetailsModalProps<T>) {
+export function ItemDetailsModal<T>({ item, columns }: ItemDetailsModalProps<T>) {
     const firstId = columns.find((c) => c.level === TypeLevel.id);
     const firstTitle = columns.find((c) => c.level === TypeLevel.titulo);
     const firstSubtitle = columns.find((c) => c.level === TypeLevel.subtitulo);

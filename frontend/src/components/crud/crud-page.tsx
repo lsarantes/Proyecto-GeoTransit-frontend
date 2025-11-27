@@ -67,11 +67,12 @@ function sortMixedId(a: string, b: string) {
 }
 
 
-export function CrudPage<T extends { id: string }>({
+export function CrudPage<T>({
     title,
     subtitle,
     Icon = Loader,
     identity,
+    verUbicacion,
     items,
     searchKeys,
     columns,
@@ -92,12 +93,13 @@ export function CrudPage<T extends { id: string }>({
     const [viewingAllLocations, setViewingAllLocations] = useState(false); // State for all locations map
 
     const firstImportantCol = columns.find(c => c.level === TypeLevel.titulo);
+    const idKey = columns.find(c => c.level === TypeLevel.id)?.key;
 
 
     // const [ dataItems, setDataItems ] = useState<T[]>(items); --> esto hacerlo en el padre de donde se mandan
 
 
-    const filteredItems = filterItems<T>(items, searchTerm, searchKeys).sort((a, b) => sortMixedId(a.id, b.id));
+    const filteredItems = (idKey) ? filterItems<T>(items, searchTerm, searchKeys).sort((a, b) => sortMixedId(String(a[idKey]), String(b[idKey]))) : items;
 
     const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
 
@@ -206,9 +208,10 @@ export function CrudPage<T extends { id: string }>({
                             <Plus size={20} />
                             Agregar {identity}
                         </Button>
-                        <Button onClick={() => setViewingAllLocations(true)} variant="secondary" className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-200">
+                        {(verUbicacion)?(<Button onClick={() => setViewingAllLocations(true)} variant="secondary" className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-200">
                             <Globe className="w-4 h-4 mr-2" /> Ver todas las ubicaciones
-                        </Button>
+                        </Button>):null}
+                        
                     </div>
 
                 </div>
@@ -243,6 +246,7 @@ export function CrudPage<T extends { id: string }>({
                             initialData={editingItem || undefined}
                             isEditing={!!editingItem}
                             fields={modalFields}
+                            verUbicaciones={verUbicacion}
                         />
                     </DialogContent>
                 </Dialog>
@@ -253,7 +257,10 @@ export function CrudPage<T extends { id: string }>({
                     originalItems={items}
                     filteredItems={filteredItems}
                     onEdit={openFormForEdit}
-                    onDelete={(id: string) => setDeletingItem(items.find(c => c.id === id) || null)}
+                    verUbicaciones={verUbicacion}
+                    onDelete={(id: string) => setDeletingItem(
+                        items.find(c => String(c[idKey!]) === id) || null
+                    )}
                     onView={setViewingItem}
                     onViewLocation={setViewingLocation}
                     handleItemsPerPageChange={handleItemsPerPageChange}
@@ -275,10 +282,10 @@ export function CrudPage<T extends { id: string }>({
 
 
                 )}
-                {viewingLocation && (
+                {verUbicacion && viewingLocation && (
                     <LocationModal
                         item={viewingLocation}
-                        columns = {columns}
+                        columns={columns}
                         onClose={() => setViewingLocation(null)}
 
                     />
@@ -342,7 +349,7 @@ export function CrudPage<T extends { id: string }>({
                             <ItemDeleteDialog
                                 itemName={firstImportantCol ? (deletingItem[firstImportantCol.key as keyof typeof deletingItem] as string) : "Sin datos"}
                                 identity={identity}
-                                onConfirm={() => handleDeleteItem(deletingItem.id)}
+                                onConfirm={() => handleDeleteItem(deletingItem[idKey!] as string)}
                                 onCancel={() => setDeletingItem(null)}
                             />
                         )}

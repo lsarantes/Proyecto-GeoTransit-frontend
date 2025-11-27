@@ -1,236 +1,119 @@
 "use client";
 
-import { useEncargado } from "@/hook/generar-registro-encargado";
-import {
-  BookImage,
-  Camera,
-  CircleUser,
-  Hash,
-  Mail,
-  MapPin,
-  Phone,
-  User,
-  UsersRound,
-  Zap,
-} from "lucide-react";
+import { useMemo } from "react";
 import { CrudPage } from "@/components/crud/crud-page";
-import {
-  DefaultStylesTableTitle,
-  DefaultStylesTableContent,
-} from "@/types/style-texto-tabla";
+import { User, Mail, Building, Hash, Camera, Calendar } from 'lucide-react';
 import { FieldConfig, TableColumn } from "@/types/crud-interface-types";
-import {
-  REGEX_EMAIL,
-  REGEX_NUMBERS_AND_LETTERS_N_LATAM,
-  REGEX_NUMBERS_AND_SYMBOLS,
-  REGEX_ONLY_LETTERS_LATAM,
-  REGEX_ONLY_NUMBERS,
-} from "@/types/regular-expresion";
+import { DefaultStylesTableTitle, DefaultStylesTableContent } from "@/types/style-texto-tabla";
+import { REGEX_ONLY_LETTERS_LATAM } from "@/types/regular-expresion";
 import { TypeLevel } from "@/types/type-level";
-import { useState } from "react";
-import { Encargado } from "@/types/interface-encargado";
+import { EncargadoBackend, EncargadoFrontend } from "@/types/interface/interface-encargado";
+import { useCrud } from "@/hook/useCrud";
 
-
-
-export default function EncargadoPage() {
+export default function EncargadosPage() {
   
-  const {encargado, setEncargado, rol} = useEncargado();
+  // 1. Hooks
+  const { 
+    items: rawEncargados, 
+    loading, 
+    createItem, updateItem, deleteItem 
+  } = useCrud<EncargadoBackend>("/encargado", "encargados-table-updated");
 
-  const opcionesParaSelect = rol.map(palabra => ({
-    label: palabra, 
-    value: palabra, 
-}));
+  // Traemos cooperativas para asignarlas
+  const { items: rawCooperativas } = useCrud<any>("/cooperativa"); 
 
-  // ---------- TABLE COLUMNS ----------
-  const columns: TableColumn<Encargado>[] = [
-    {
-      key: "id",
-      label: "ID",
-      level: TypeLevel.id,
-      classNameTitle: DefaultStylesTableTitle.idTitle,
-      classNameText: DefaultStylesTableContent.id,
-      Icon: Hash,
-    },
-    {
-      key: "foto",
-      label: "Foto",
-      level: TypeLevel.foto,
-      classNameTitle: DefaultStylesTableTitle.centerTitle,
-      classNameText: DefaultStylesTableContent.foto,
-      Icon: Camera,
-    },
-    {
-      key: "nombre",
-      label: "Nombre",
-      level: TypeLevel.titulo,
-      classNameTitle: DefaultStylesTableTitle.normalTitle,
-      classNameText: DefaultStylesTableContent.titulo,
-      Icon: CircleUser,
-    },
-    {
-      key: "rol",
-      label: "Rol",
-      level: TypeLevel.subtitulo,
-      classNameTitle: DefaultStylesTableTitle.normalTitle,
-      classNameText: DefaultStylesTableContent.subtitulo,
-      Icon: Camera,
-    },
-    {
-      key: "correo",
-      label: "Correo",
-      level: TypeLevel.textNormal,
-      classNameTitle: DefaultStylesTableTitle.normalTitle,
-      classNameText: DefaultStylesTableContent.text,
-      Icon: Mail,
-    },
-    {
-      key: "direccion",
-      label: "Dirección",
-      level: TypeLevel.textNormal,
-      classNameTitle: DefaultStylesTableTitle.normalTitle,
-      classNameText: DefaultStylesTableContent.text,
-      Icon: MapPin,
-    },
-    {
-      key: "telefono",
-      label: "Teléfono",
-      level: TypeLevel.textNormal,
-      classNameTitle: DefaultStylesTableTitle.normalTitle,
-      classNameText: DefaultStylesTableContent.text,
-      Icon: Phone,
-    },
+  // 2. Transformación
+  const encargados: EncargadoFrontend[] = useMemo(() => {
+    return rawEncargados.map((e) => {
+        // Desglosar nombres para llenar el formulario al editar
+        // Nota: Esto es una aproximación, idealmente el backend manda desglosado si se requiere exactitud
+        const nameParts = e.nombres.split(' ');
+        const surnameParts = e.apellidos.split(' ');
+
+        return {
+            id: e.id,
+            nombreCompleto: e.nombreCompleto,
+            email: e.email,
+            fotoUrl: e.fotoUrl || undefined,
+            fechaRegistro: e.fechaRegistro,
+            
+            // Visualización de Tags en tabla
+            cooperativasTexto: e.cooperativas.map(c => c.nombre).join(', '),
+            
+            // Datos para Formulario (Edición)
+            primer_nombre: nameParts[0] || '',
+            segundo_nombre: nameParts[1] || '',
+            tercer_nombre: nameParts[2] || '',
+            primer_apellido: surnameParts[0] || '',
+            segundo_apellido: surnameParts[1] || '',
+            cooperativasIds: e.cooperativas.map(c => c.id)
+        };
+    });
+  }, [rawEncargados]);
+
+  const opcionesCoops = rawCooperativas.map((c: any) => ({
+      value: c.codigoCoop,
+      label: c.nombre_cooperativa
+  }));
+
+  // 3. Columnas
+  const columns: TableColumn<EncargadoFrontend>[] = [
+    { key: "id", label: "Cód", level: TypeLevel.id, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.id, Icon: Hash },
+    { key: "fotoUrl", label: "Foto", level: TypeLevel.foto, classNameTitle: DefaultStylesTableTitle.centerTitle, classNameText: DefaultStylesTableContent.foto, Icon: Camera },
+    { key: "nombreCompleto", label: "Nombre Completo", level: TypeLevel.titulo, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.titulo, Icon: User },
+    { key: "email", label: "Usuario Acceso", level: TypeLevel.textNormal, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Mail },
+    { key: "cooperativasTexto", label: "Coops. Asignadas", level: TypeLevel.textRelevante, classNameTitle: DefaultStylesTableTitle.normalTitle, classNameText: DefaultStylesTableContent.text, Icon: Building },
   ];
 
-  // ---------- MODAL FIELDS ----------
-  const modalFields: FieldConfig<Encargado>[] = [
+  // 4. Formulario
+  const modalFields: FieldConfig<EncargadoFrontend>[] = [
     {
-      key: "id",
-      label: "Id del Encargado",
-      placeholder: "Ej: E0001",
-      type: "text",
-      layout: "grid",
-      pattern: REGEX_NUMBERS_AND_LETTERS_N_LATAM.source,
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "El id es requerido";
-        }
-        return null;
-      },
+      key: "id", label: "Código Encargado", placeholder: "Ej. ENC-001",
+      type: "text", layout: "full", validate: (val) => !val ? "Requerido" : null
     },
+    // Nombres
+    { key: "primer_nombre", label: "Primer Nombre", type: "text", layout: "grid", pattern: REGEX_ONLY_LETTERS_LATAM.source, validate: (val) => !val ? "Requerido" : null },
+    { key: "segundo_nombre", label: "Segundo Nombre", type: "text", layout: "grid", pattern: REGEX_ONLY_LETTERS_LATAM.source },
+    { key: "primer_apellido", label: "Primer Apellido", type: "text", layout: "grid", pattern: REGEX_ONLY_LETTERS_LATAM.source, validate: (val) => !val ? "Requerido" : null },
+    { key: "segundo_apellido", label: "Segundo Apellido", type: "text", layout: "grid", pattern: REGEX_ONLY_LETTERS_LATAM.source },
+    
+    // Usuario
+    { key: "email", label: "Correo Electrónico (Login)", type: "text", layout: "full", validate: (val) => !val?.includes('@') ? "Correo inválido" : null },
+    
+    // Relación
     {
-      key: "nombre",
-      label: "Nombre Completo",
-      placeholder: "Ej: Edgard Antonio Rodriguez",
-      type: "text",
-      layout: "grid",
-      pattern: REGEX_ONLY_LETTERS_LATAM.source,
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "El nombre es requerido";
-        }
-        return null;
-      },
+      key: "cooperativasIds", label: "Asignar a Cooperativas",
+      type: "multiselect", layout: "full",
+      options: opcionesCoops
     },
-    {
-      key: "correo",
-      label: "Correo",
-      placeholder: "Ej: ejemplo@ejemplo.com",
-      type: "email",
-      layout: "full",
-      pattern: "",
-      inputMode: "email",
-      validate: (value) => {
-        if (!value) {
-          return "El correo electrónico es obligatorio";
-        }
-        if (!REGEX_EMAIL.test(value)) {
-          return "El formato del correo no es válido";
-        }
-        return null;
-      },
-    },
-    {
-      key: "direccion",
-      label: "Dirección",
-      placeholder: "Calle Principal 123, Ciudad",
-      type: "text",
-      layout: "full",
-      pattern: "",
-      inputMode: "text",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "La dirección es requerida";
-        }
-        return null;
-      },
-    },
-    {
-      key: "telefono",
-      label: "Teléfono",
-      placeholder: "+505 2255-0000",
-      type: "tel",
-      layout: "grid",
-      pattern: REGEX_NUMBERS_AND_SYMBOLS.source,
-      inputMode: "tel",
-      validate: (value) => {
-        if (!value || typeof value !== "string" || !value.trim()) {
-          return "El teléfono es requerido";
-        }
-        return null;
-      },
-    },
-    {
-      key: "rol",
-      label: "Rol",
-      type: "select",
-      layout: "grid",
-      options: opcionesParaSelect,
-    },
-    {
-      key: "foto",
-      label: "Fotografía",
-      type: "photo",
-      layout: "full"
-    },
+    { key: "fotoUrl", label: "Foto Perfil", type: "photo", layout: "full" },
   ];
 
-  // ---------- SEARCH KEYS ----------
-  const searchKeys: (keyof Encargado)[] = ["id", "nombre"];
+  const searchKeys: (keyof EncargadoFrontend)[] = ["id", "nombreCompleto", "email"];
 
-  // ---------- HANDLERS ----------
-  const onCreate = (data: Encargado) => {
-    console.log("CREAR:", data);
-    setEncargado((prev) => [...(prev || []), data]);
+  // 5. Handlers
+  const handleCreate = async (formData: any) => {
+      await createItem(formData); // El DTO del backend coincide con las keys del form
   };
 
-  const onUpdate = (data: Encargado) => {
-    console.log("UPDATE:", data);
-    setEncargado((prev) =>
-      (prev || []).map((item) => (item.id === data.id ? data : item))
-    );
-  };
-
-  const onDelete = (id: string) => {
-    console.log("DELETE:", id);
-
-    setEncargado((prev) => (prev || []).filter((item) => item.id !== id));
+  const handleUpdate = async (formData: any) => {
+      await updateItem(formData.id, formData);
   };
 
   return (
-    <CrudPage<Encargado>
+    <CrudPage<EncargadoFrontend>
       title="Gestión de Encargados"
-      subtitle="Administra todas tus Encargados en un solo lugar"
-      Icon={UsersRound}
+      subtitle="Crea personal y sus credenciales de acceso"
+      Icon={User}
       identity="Encargado"
-      items={encargado || []}
+      items={encargados}
       columns={columns}
       searchKeys={searchKeys}
       modalFields={modalFields}
-      onCreate={onCreate}
-      onUpdate={onUpdate}
-      onDelete={onDelete}
+      verUbicacion={false}
+      onCreate={handleCreate}
+      onUpdate={handleUpdate}
+      onDelete={(id) => deleteItem(id)}
     />
   );
 }

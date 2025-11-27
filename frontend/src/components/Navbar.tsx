@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ChevronDown, Building2, MapPin, MapPinned, Menu, X, Settings, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
+import { toast } from 'sonner';
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -22,7 +23,7 @@ function useIsMobile() {
 
 const Navbar = () => {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout ,user} = useAuth();
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({
     cooperativas: false,
     rutas: false,
@@ -35,10 +36,32 @@ const Navbar = () => {
 
  
 
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
+  const handleLogout = async () => {
+    // 1. Notificación de carga
+    const loadingToast = toast.loading('Cerrando sesión...');
+    
+    try {
+        // 2. Ejecuta la lógica asíncrona de logout (aviso al backend y limpieza local)
+        await logout();
+
+        // 3. Éxito: Limpia la notificación de carga y muestra el mensaje final
+        toast.dismiss(loadingToast);
+        toast.success('👋 Sesión cerrada con éxito.');
+
+        // 4. Redirige, borrando el historial de navegación
+        router.replace('/login');
+
+    } catch (error) {
+        // 5. Manejo de error (si falla el aviso al servidor, pero la sesión local se borró)
+        toast.dismiss(loadingToast);
+        toast.error('Error al cerrar sesión', {
+            description: 'Hubo un problema al notificar al servidor, pero tu sesión ha sido eliminada localmente.',
+        });
+        
+        // Se fuerza la redirección aunque el aviso al servidor haya fallado.
+        router.replace('/login'); 
+    }
+};
 
   const openDropdown = (menu: string) => {
     if (closeTimerRef.current[menu]) {
@@ -254,10 +277,10 @@ const Navbar = () => {
 
               <div className="flex flex-col">
                 <p className="font-semibold text-sm" style={{ color: 'var(--foreground)' }}>
-                  Paolo Guerrero
+                  {user?.nombreCompleto || "Renzito"} {user?.apellido || "Renzito"}
                 </p>
                 <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  Encargado MTI
+                  {user?.email || "Encargado MTI"}
                 </p>
               </div>
 

@@ -1,4 +1,4 @@
-import { Encargado } from "@/types/interface-encargado";
+import { Encargado } from "@/types/interface/interface-encargado";
 import { useState } from "react";
 
 

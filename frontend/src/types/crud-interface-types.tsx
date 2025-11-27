@@ -35,6 +35,7 @@ export type CrudPageProps<T> = {
     subtitle?: string;
     Icon?: React.ComponentType<LucideProps> ;
     identity: string;
+    verUbicacion: boolean,
     items: T[];
     searchKeys: (keyof T)[];
     columns: TableColumn<T>[];
@@ -54,6 +55,7 @@ export interface GenericTableProps<T> {
     originalItems: T[];
     filteredItems: T[];
     identity: string
+    verUbicaciones: boolean
     Icon?: React.ComponentType<LucideProps>;
     columns: TableColumn<T>[];
     searchTerm: string;

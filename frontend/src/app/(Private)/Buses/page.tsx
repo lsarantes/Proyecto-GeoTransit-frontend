@@ -8,7 +8,7 @@ import { FieldConfig, TableColumn } from "@/types/crud-interface-types";
 import { handleValidatedChange, REGEX_NUMBERS_AND_LETTERS_N_LATAM, REGEX_NUMBERS_AND_SYMBOLS, REGEX_ONLY_LETTERS_LATAM, REGEX_ONLY_NUMBERS } from "@/types/regular-expresion";
 import { TypeLevel } from "@/types/type-level";
 import { useBuses } from "@/hook/generar-registro-buses";
-import { Buses } from "@/types/interface-buses";
+import { Buses } from "@/types/interface/interface-buses";
 
 
 

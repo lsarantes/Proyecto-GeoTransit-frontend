@@ -8,7 +8,7 @@ import { DefaultStylesTableTitle, DefaultStylesTableContent } from "@/types/styl
 import { FieldConfig, TableColumn } from "@/types/crud-interface-types";
 import { handleValidatedChange, REGEX_NUMBERS_AND_LETTERS_N_LATAM, REGEX_NUMBERS_AND_SYMBOLS, REGEX_ONLY_LETTERS_LATAM, REGEX_ONLY_NUMBERS } from "@/types/regular-expresion";
 import { TypeLevel } from "@/types/type-level";
-import { Bahias } from "@/types/interface-bahias";
+import { Bahias } from "@/types/interface/interface-bahias";
 import { useBahias } from "@/hook/generar-registro-bahias";
 
 

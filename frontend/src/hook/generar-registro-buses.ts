@@ -1,4 +1,4 @@
-import { Buses, Estados } from "@/types/interface-buses";
+import { Buses, Estados } from "@/types/interface/interface-buses";
 import { useState } from "react";
 
 export function useBuses() {

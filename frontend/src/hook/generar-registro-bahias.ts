@@ -1,4 +1,4 @@
-import { Bahias, empleado } from "@/types/interface-bahias";
+import { Bahias, empleado } from "@/types/interface/interface-bahias";
 import { useState } from "react";
 
 // --- TIPOS ADICIONALES (Prisma Enums) ---

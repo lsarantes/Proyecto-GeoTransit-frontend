@@ -1,4 +1,4 @@
-import { EstadosDefinidos } from "./types-stule-estado";
+import { EstadosDefinidos } from "../types-stule-estado";
 
 export interface Buses {
   id: string;

@@ -6,58 +6,63 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+import { AuthService } from '@/service/auth.services';
+import { RoleLabels } from '@/types/enum/enum-rol';
 
 
 export default function LoginForm() {
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
 
 
     const { login } = useAuth();
     const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
 
         try {
-            // Simulate authentication
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await login(identifier, password);
+            toast.success(`¡Bienvenido!`, {
+                description: 'Inicio de sesión exitoso',
+                duration: 4000,
+            });
 
-            // Here you would integrate with your actual auth system
-            console.log('Login attempt with:', { email, password });
-
-            // Redirect to dashboard (placeholder)
-            login()
+            // Redirección
             router.push('/dashboard');
-        } catch (err) {
-            setError('Error al iniciar sesión. Intenta de nuevo.');
+
+        } catch (err: any) {
+            // Manejo de errores (Igual que antes)
+            const errorMsg = err.message || 'Error al iniciar sesión.'; // err.message vendrá de tu apiFetch limpio
+            
+            toast.error('Error de acceso', {
+                description: errorMsg,
+            });
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Input */}
-            <div className="space-y-2">
+              <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-semibold text-foreground">
-                    Correo Electrónico
+                    Correo Electrónico o Usuario
                 </label>
                 <div className="relative group">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40 group-focus-within:text-primary transition-colors" />
                     <Input
                         id="email"
-                        type="email"
-                        placeholder="usuario@empresa.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 bg-input border border-border text-foreground placeholder:text-foreground/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                        type="text" // Text para permitir usernames que no sean emails
+                        placeholder="ejemplo@jemplo.com o ejemploUsuario"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        className="pl-10 bg-input border border-border text-foreground placeholder:text-foreground/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all h-11"
                         required
+                        disabled={loading}
                     />
                 </div>
             </div>
@@ -99,12 +104,6 @@ export default function LoginForm() {
                 </a>
             </div>
 
-            {/* Error Message */}
-            {error && (
-                <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-sm text-destructive">
-                    {error}
-                </div>
-            )}
 
             {/* Submit Button */}
             <Button
