@@ -5,12 +5,9 @@ import { Save, UserCog, Undo2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-// Importamos tus componentes locales
 import { ProfileForm } from "@/components/configPerfil/profile-form"
 import { ProfileAvatar } from "@/components/configPerfil/profile-avatar"
 
-// 👇 1. Interfaz de Datos (Coincide con tu ProfileForm)
 interface ProfileData {
   primerNombre: string
   segundoNombre: string
@@ -21,12 +18,11 @@ interface ProfileData {
   fechaCreacion: string
   fechaActualizacion: string
   rol: string
-  fotoUrl?: string // Agregamos campo opcional para la foto
+  fotoUrl?: string 
 }
 
 export default function ConfiguracionPerfilPage() {
   
-  // 👇 2. Estado Inicial (Simulando datos de BD)
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   
@@ -43,33 +39,23 @@ export default function ConfiguracionPerfilPage() {
     fotoUrl: "https://github.com/shadcn.png"
   })
 
-  // Copia de seguridad para cancelar cambios
   const [backupData, setBackupData] = useState<ProfileData>(profileData)
 
-  // 👇 3. Handlers (Manejadores de lógica)
-
-  // Activar modo edición
   const handleStartEdit = () => {
-    setBackupData({ ...profileData }) // Guardamos estado actual
+    setBackupData({ ...profileData }) 
     setIsEditing(true)
   }
 
-  // Cancelar edición
   const handleCancel = () => {
-    setProfileData(backupData) // Restauramos datos
+    setProfileData(backupData) 
     setIsEditing(false)
   }
 
-  // Guardar cambios
   const handleSave = async () => {
     setIsLoading(true)
     
-    // Simulamos petición al backend
     setTimeout(() => {
       console.log("GUARDANDO PERFIL:", profileData)
-      // Aquí iría tu llamada a la API: await updateProfile(profileData)
-      
-      // Actualizamos la fecha de modificación localmente
       setProfileData(prev => ({
         ...prev,
         fechaActualizacion: new Date().toISOString()
@@ -80,12 +66,10 @@ export default function ConfiguracionPerfilPage() {
     }, 1000)
   }
 
-  // Actualizar campos del formulario
   const handleChange = (newData: ProfileData) => {
     setProfileData(newData)
   }
 
-  // Actualizar solo la foto
   const handlePhotoChange = (newUrl: string) => {
     setProfileData(prev => ({ ...prev, fotoUrl: newUrl }))
   }
@@ -107,17 +91,17 @@ export default function ConfiguracionPerfilPage() {
           <div className="flex gap-3">
             {isEditing ? (
               <>
-                <Button variant="outline" onClick={handleCancel} disabled={isLoading} className="cursor-pointer text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 font-medium">
+                <Button variant="outline" onClick={handleCancel} disabled={isLoading} className="text-slate-600 hover:text-slate-800 hover:bg-slate-200/50 cursor-pointer">
                   <Undo2 className="mr-2 h-4 w-4" />
                   Cancelar
                 </Button>
-                <Button onClick={handleSave} disabled={isLoading} className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white">
+                <Button onClick={handleSave} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
                   <Save className="mr-2 h-4 w-4" />
                   {isLoading ? "Guardando..." : "Guardar Cambios"}
                 </Button>
               </>
             ) : (
-              <Button onClick={handleStartEdit} className="bg-gradient-to-r from-[var(--colorPrimary)] to-[var(--colorAcentuar)] hover:from-[#1a5a9f] hover:to-[#4a449a] text-white">
+              <Button onClick={handleStartEdit} className="cursor-pointerbg-gradient-to-r from-[var(--colorPrimary)] to-[var(--colorAcentuar)] hover:from-[#1a5a9f] hover:to-[#4a449a] text-white">
                 <UserCog className="mr-2 h-4 w-4" />
                 Editar Perfil
               </Button>

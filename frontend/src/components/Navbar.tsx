@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { ChevronDown, Building2, MapPin, MapPinned, Menu, X, Settings, LogOut } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
+import { ChevronDown, Building2, MapPin, MapPinned, Menu, X, Settings, LogOut, Bus, Users } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -27,6 +27,8 @@ const Navbar = () => {
     cooperativas: false,
     rutas: false,
     bahias: false,
+    buses: false,    
+    usuarios: false,
     usuario: false,
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -81,6 +83,7 @@ const Navbar = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex desktop-navbar gap-1">
+
               {/* Cooperativas */}
               <div
                 className="relative"
@@ -91,7 +94,7 @@ const Navbar = () => {
                 onMouseLeave={() => closeDropdown('cooperativas')}
               >
                 <button
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
+                  className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
                   style={{ color: 'var(--foreground)' }}
 
                 >
@@ -136,106 +139,44 @@ const Navbar = () => {
               </div>
 
               {/* Rutas */}
-              <div
-                className="relative"
-                ref={(el) => {
-                  dropdownRefs.current.rutas = el;
-                }}
-                onMouseEnter={() => openDropdown('rutas')}
-                onMouseLeave={() => closeDropdown('rutas')}
+              <Link
+                href="/Rutas" 
+                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
+                style={{ color: 'var(--foreground)' }}
               >
-                <button
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  <MapPin className="w-4 h-4 group-hover:text-primary transition-colors" />
-                  <span>Rutas</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdowns.rutas ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown */}
-                {openDropdowns.rutas && (
-                  <div
-                    className="absolute left-0 mt-2 w-64 rounded-xl shadow-lg z-50 py-2 animate-fade-in border"
-                    style={{
-                      backgroundColor: 'var(--card)',
-                      borderColor: 'var(--border)'
-                    }}
-                  >
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      <div className="font-semibold">Crear</div>
-                      <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                        Crea nuevas Rutas
-                      </div>
-                    </Link>
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      <div className="font-semibold">Administrar</div>
-                      <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                        Edita y elimina Rutas
-                      </div>
-                    </Link>
-                  </div>
-                )}
-              </div>
+                <MapPin className="w-4 h-4 group-hover:text-primary transition-colors" />
+                <span>Rutas</span>
+              </Link>
 
               {/* Bahías */}
-              <div
-                className="relative"
-                ref={(el) => {
-                  dropdownRefs.current.bahias = el;
-                }}
-                onMouseEnter={() => openDropdown('bahias')}
-                onMouseLeave={() => closeDropdown('bahias')}
+               <Link
+                href="/Bahias"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
+                style={{ color: 'var(--foreground)' }}
               >
-                <button
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  <MapPinned className="w-4 h-4 group-hover:text-primary transition-colors" />
-                  <span>Bahías</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdowns.bahias ? 'rotate-180' : ''}`} />
-                </button>
+                <MapPinned className="w-4 h-4 group-hover:text-primary transition-colors" />
+                <span>Bahías</span>
+              </Link>
 
-                {/* Dropdown */}
-                {openDropdowns.bahias && (
-                  <div
-                    className="absolute left-0 mt-2 w-64 rounded-xl shadow-lg z-50 py-2 animate-fade-in border"
-                    style={{
-                      backgroundColor: 'var(--card)',
-                      borderColor: 'var(--border)'
-                    }}
-                  >
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      <div className="font-semibold">Crear</div>
-                      <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                        Crea nuevas Bahías
-                      </div>
-                    </Link>
-                    <Link
-                      href="#"
-                      className="block px-4 py-3 text-sm transition-all rounded-md mx-2 hover:bg-secondary/40"
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      <div className="font-semibold">Administrar</div>
-                      <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                        Edita y elimina Bahías
-                      </div>
-                    </Link>
-                  </div>
-                )}
-              </div>
+              {/* Buses */}
+              <Link
+                href="/Buses" 
+                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
+                style={{ color: 'var(--foreground)' }}
+              >
+                <Bus className="w-4 h-4 group-hover:text-primary transition-colors" />
+                <span>Buses</span>
+              </Link>
+
+              {/* Usuarios */}
+              <Link
+                href="/usuarios" 
+                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-secondary/50 text-sm font-medium group"
+                style={{ color: 'var(--foreground)' }}
+              >
+                <Users className="w-4 h-4 group-hover:text-primary transition-colors" />
+                <span>Usuarios</span>
+              </Link>
             </div>
           </div>
 
